@@ -1,6 +1,5 @@
 # node-red-contrib-generic-s3
 
-<!-- ![generic S3 nodes](icons/s3Logo.png) -->
 <img src="icons/s3Logo.png" alt="drawing" width="150"/>
 
 
