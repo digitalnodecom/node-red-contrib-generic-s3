@@ -1,6 +1,7 @@
 module.exports = function(RED) {
     "use strict";
     var fs = require('fs');
+    const crypto = require('crypto');
     const { S3 } = require('@aws-sdk/client-s3');
     const { Readable } = require('stream');
 
@@ -433,12 +434,36 @@ module.exports = function(RED) {
                     return;
                 }
 
+                // Calculating MD5 od the body
+                const MD5 = crypto.createHash('md5').update(this.body).digest("hex");
+
+                // Fetching HeadData (Metadata) for the object that is being upserted or inserted
+                let objectMeta = {};
+                try{
+                    objectMeta = await this.s3Client.headObject({
+                        Bucket: this.bucket,
+                        Key: this.key
+                    });
+                    let ETag = objectMeta.ETag.substring(1, objectMeta.ETag.length - 1); // Formatting the ETag
+                    
+                    // Checking if the existing object data is exactly the same as the request message
+                    if(ETag == MD5) {
+                        node.warn(`The object ${this.key} has not been upserted since the body of the existing object is exactly the same`);
+                        this.s3Client.destroy();
+                        done();
+                        return;
+                    }
+                } catch (e) {
+                    // If the object does not exist, continue with inserting
+                }
+
+
                 // Creating the upload object
                 let objectToCreate = {
                     Bucket: this.bucket,
                     Key: this.key,
                     ContentType: this.contentType,
-                    Body: stringToStream(this.body)
+                    Body: streamifiedBody
                 };
                 
                 if(this.metadata) objectToCreate.Metadata = this.metadata;
@@ -532,12 +557,39 @@ module.exports = function(RED) {
                 });
 
                 // Creating the upload object
-                let objectsToPut = createS3formatInputObjectArray(this.objects);
+                let inputObjects = this.objects;
+                // let inputObjects = createS3formatInputObjectArray(this.objects);
+                let objectsToPut = [];
+
+                node.status({fill:"blue",shape:"dot",text:"Comparison 0%"});
+                for(let i = 0; i < inputObjects.length; i++) {
+                    node.status({fill: "blue", shape: "dot", text: `Comparison ${parseInt((i/inputObjects.length) * 100)}%`});
+                    try {
+                        let objectMeta = await this.s3Client.headObject({
+                            Bucket: inputObjects[i].bucket,
+                            Key: inputObjects[i].key
+                        });
+                        
+                        let ETag = objectMeta.ETag.substring(1, objectMeta.ETag.length - 1); // Formatting the ETag
+                        const MD5 = crypto.createHash('md5').update(inputObjects[i].body).digest("hex");     
+
+                        // Checking if the existing object data is exactly the same as the request message
+                        if(ETag != MD5) {
+                            objectsToPut.push(inputObjects[i]);
+                        }
+
+                    } catch (e) {
+                        objectsToPut.push(inputObjects[i]);
+                    }
+                }
+
+                objectsToPut = createS3formatInputObjectArray(objectsToPut);
                 
                 // Uploading
                 node.status({fill:"blue",shape:"dot",text:"Uploading 0%"});
                 let responses = [];
                 for(let i = 0; i < objectsToPut.length; i++) {
+                    // node.warn(objectsToPut[i])
                     let response = await this.s3Client.putObject(objectsToPut[i]);
                     response.Key = objectsToPut[i].Key;
                     responses.push(response)
