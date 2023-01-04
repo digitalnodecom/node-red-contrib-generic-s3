@@ -349,7 +349,7 @@ module.exports = function(RED) {
             return;
         }
 
-        this.on('input', function(msg, send, done) {
+        this.on('input', async function(msg, send, done) {
 
             this.bucket = n.bucket !== "" ? n.bucket : null; // Bucket info
             this.key = n.key !== "" ? n.key : null; // Object key
