@@ -342,11 +342,6 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.bucket = n.bucket != "" ? n.bucket : null; // Bucket info
-        this.key = n.key != "" ? n.key : null; // Object key
-        this.body = n.body != "" ? n.body : null; // Body of the object to upload
-        this.metadata = n.metadata != "" ? n.metadata : null; // Metadata of the object
-        this.contentType = n.contentType != "" ? n.contentType : null; // Content-Type of the object
 
         // If there is no conifg
         if (!config) {
@@ -354,7 +349,13 @@ module.exports = function(RED) {
             return;
         }
 
-        this.on('input', async function(msg, send, done) {
+        this.on('input', function(msg, send, done) {
+
+            this.bucket = n.bucket !== "" ? n.bucket : null; // Bucket info
+            this.key = n.key !== "" ? n.key : null; // Object key
+            this.body = n.body !== "" ? n.body : null; // Body of the object to upload
+            this.metadata = n.metadata !== "" ? n.metadata : null; // Metadata of the object
+            this.contentType = n.contentType !== "" ? n.contentType : null; // Content-Type of the object
             
             // Checking for correct properties input
             if(!this.bucket) {
@@ -448,7 +449,7 @@ module.exports = function(RED) {
 
                 // Formatting and returning the response
                 delete response.$metadata;
-                send({
+                node.send({
                     payload: response
                 });
 
