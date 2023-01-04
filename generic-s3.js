@@ -47,6 +47,50 @@ module.exports = function(RED) {
         }
     }
 
+    // Check if a given array has valid input objects
+    const isValidInputObjectArray = (arr) => {
+        let isValid = true;
+        arr.forEach(element => {
+            if (
+                !element.hasOwnProperty('bucket') ||
+                !element.hasOwnProperty('key') ||
+                !element.hasOwnProperty('body') ||
+                !element.hasOwnProperty('contentType') ||
+                !isString(element['body'])
+            ) isValid = false;
+
+            if(element.hasOwnProperty('metadata'))
+                if(!isJsonString(element.metadata))
+                    if(!isObject(element.metadata))
+                        isValid = false;
+        });
+        return isValid;
+    }
+
+    // Create S3 client format object array from input object array
+    const createS3formatInputObjectArray = (arr) => {
+        let s3Array = [];
+        arr.forEach(element => {
+            if(element.hasOwnProperty('metadata'))
+                s3Array.push({
+                    Bucket: element.bucket,
+                    Key: element.key,
+                    ContentType: element.contentType,
+                    Body: stringToStream(element.body),
+                    Metadata: element.metadata
+                })
+            else
+                s3Array.push({
+                    Bucket: element.bucket,
+                    Key: element.key,
+                    ContentType: element.contentType,
+                    Body: stringToStream(element.body)
+                })
+        })
+
+        return s3Array;
+    }
+
     // Configuration / Client node
     function ClientNode(n) {
         RED.nodes.createNode(this,n);
@@ -433,6 +477,102 @@ module.exports = function(RED) {
     }
 
     RED.nodes.registerType('Put Object', S3PutObject);
+
+    // Put Objects
+    function S3PutObjects(n) {
+        RED.nodes.createNode(this,n); // Getting options for the current node
+        this.conf = RED.nodes.getNode(n.conf); // Getting configuration
+        var node = this; // Referencing the current node
+        var config = this.conf ? this.conf : null; // Cheking if the conf is valid
+        this.objects = n.objects != "" ? n.objects : null; // Bucket info
+
+        // If there is no conifg
+        if (!config) {
+            node.warn(RED._("Missing S3 Client Configuration!"));
+            return;
+        }
+
+        this.on('input', async function(msg, send, done) {
+            
+            // Checking for correct properties input
+            if(!this.objects) {
+                this.objects = msg.objects ? msg.objects : null;
+                
+                if(!isJsonString(this.objects)) {
+                    if(!Array.isArray(this.objects)) {
+                        node.error('Invalid objects input format!');
+                        return;
+                    }
+                }
+
+                if(isJsonString(this.objects))
+                    this.objects = JSON.parse(this.objects);
+
+                if(!Array.isArray(this.objects)) {
+                    node.error('The provided input for objects is not an array!');
+                    return;
+                }
+
+                if(!isValidInputObjectArray(this.objects)) {
+                    node.error('The provided array\'s objects are not in valid format!');
+                    return;
+                }
+            }
+
+            try {
+                // Creating S3 client
+                this.s3Client = new S3({
+                    endpoint: config.endpoint,
+                    region: config.region,
+                    credentials: {
+                        accessKeyId: config.credentials.accesskeyid,
+                        secretAccessKey: config.credentials.secretaccesskey
+                    }
+                });
+
+                // Creating the upload object
+                let objectsToPut = createS3formatInputObjectArray(this.objects);
+                
+                // Uploading
+                node.status({fill:"blue",shape:"dot",text:"Uploading 0%"});
+                let responses = [];
+                for(let i = 0; i < objectsToPut.length; i++) {
+                    let response = await this.s3Client.putObject(objectsToPut[i]);
+                    response.Key = objectsToPut[i].Key;
+                    responses.push(response)
+                    node.status({fill: "blue", shape: "dot", text: `Uploading ${parseInt((i/objectsToPut.length) * 100)}%`});
+                }
+
+                // Formatting and returning the response
+                send({
+                    payload: responses
+                });
+
+                // Finalize
+                this.s3Client.destroy();
+                done();
+
+                node.status({fill:"green",shape:"dot",text:`Success`});
+                setTimeout(() => {
+                    node.status({});
+                }, 5000);
+            }
+            catch (err) {
+                // If error occurs
+                node.error(err);
+                // Cleanup
+                this.s3Client.destroy();
+                done();
+
+                node.status({fill:"red",shape:"dot",text:"Failure"});
+                setTimeout(() => {
+                    node.status({});
+                }, 5000);
+            }
+        });
+    }
+
+    RED.nodes.registerType('Put Objects', S3PutObjects);
 
     // Delete object
     function S3DeleteObject(n) {
