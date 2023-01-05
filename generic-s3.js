@@ -434,7 +434,10 @@ module.exports = function(RED) {
                 const streamifiedBody = stringToStream(body);
                 if(!streamifiedBody) {
                     node.error('Failed to streamify body. Body needs to be a string!');
-                    done();
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    } 
                     return;
                 }
 
@@ -453,6 +456,7 @@ module.exports = function(RED) {
                     // Checking if the existing object data is exactly the same as the request message
                     if(ETag == MD5) {
                         node.warn(`The object ${msg.key} has not been upserted since the body of the existing object is exactly the same`);
+                        send({payload: null, key: msg.key});
                         if(done) done();
                         return;
                     }
@@ -622,8 +626,11 @@ module.exports = function(RED) {
                 node.status({fill:"blue",shape:"dot",text:"Uploading"});
                 let responses = [];
                 for(let i = 0; i < objectsToPut.length; i++) {
-                    let response = await s3Client.putObject(objectsToPut[i]);
-                    response.key = objectsToPut[i].Key;
+                    let response = {
+                        payload: {},
+                        key: objectsToPut[i].Key
+                    }
+                    response.payload = await s3Client.putObject(objectsToPut[i]);
                     responses.push(response)
                     node.status({fill: "blue", shape: "dot", text: `Uploading ${parseInt((i/objectsToPut.length) * 100)}%`});
                 }
