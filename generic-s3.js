@@ -778,7 +778,6 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.bucket = n.bucket != "" ? n.bucket : null; // Bucket info
 
         // If there is no conifg
         if (!config) {
@@ -788,18 +787,20 @@ module.exports = function(RED) {
 
         this.on('input',  async function(msg, send, done) {
 
+            let bucket = n.bucket != "" ? n.bucket : null; // Bucket info
             // Checking for correct properties input
-            if(!this.bucket) {
-                this.bucket = msg.bucket ? msg.bucket : null;
-                if(!this.bucket) {
+            if(!bucket) {
+                bucket = msg.bucket ? msg.bucket : null;
+                if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
             }
 
+            let s3Client = null;
             try {
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -810,31 +811,38 @@ module.exports = function(RED) {
 
                 // Creating bucket
                 node.status({fill:"blue",shape:"dot",text:"Creating Bucket"});
-                const response = await this.s3Client.createBucket({
-                    Bucket: this.bucket
-                })
+                s3Client.createBucket({ Bucket: bucket }, function(err, data) {
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        send({payload: null, bucket: bucket});
+                    } else {
+                        send({
+                            payload: data,
+                            bucket: bucket
+                        })
+                        node.status({fill:"green",shape:"dot",text:"Success"});
+                    }
 
-                // Returning response
-                delete response.$metadata;
-                send({
-                    payload: response
-                })
-                
-                node.status({fill:"green",shape:"dot",text:`Created!`});
-                // Finalize
-                this.s3Client.destroy();
-                done();
+                    node.status({fill:"green",shape:"dot",text:`Created!`});
+                    // Finalize
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+    
+                    setTimeout(() => {
+                        node.status({});
+                    }, 3000);
+                });
 
-                setTimeout(() => {
-                    node.status({});
-                }, 3000);
             }
             catch (err) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
@@ -846,6 +854,4 @@ module.exports = function(RED) {
     }
 
     RED.nodes.registerType('Create Bucket', S3CreateBucket);
-
-    // Function node
 };
