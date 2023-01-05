@@ -684,8 +684,6 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.bucket = n.bucket != "" ? n.bucket : null; // Bucket info
-        this.key = n.key != "" ? n.key : null; // Object key
 
 
         // If there is no conifg
@@ -696,28 +694,31 @@ module.exports = function(RED) {
 
 
         this.on('input',  async function(msg, send, done) {
+            let bucket = n.bucket != "" ? n.bucket : null; // Bucket info
+            let key = n.key != "" ? n.key : null; // Object key
 
             // Checking for correct properties input
-            if(!this.bucket) {
-                this.bucket = msg.bucket ? msg.bucket : null;
-                if(!this.bucket) {
+            if(!bucket) {
+                bucket = msg.bucket ? msg.bucket : null;
+                if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
             }
 
-            if(!this.key) {
-                this.key = msg.key ? msg.key : null;
-                if(!this.key) {
+            if(!key) {
+                key = msg.key ? msg.key : null;
+                if(!key) {
                     node.error('No object key provided!');
                     return;
                 }
             }
 
-
+            // S3 client init
+            let s3Client = null;
             try {
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -727,33 +728,37 @@ module.exports = function(RED) {
                 });
 
                 node.status({fill:"blue",shape:"dot",text:"Deleting"});
-                const response = await this.s3Client.deleteObject({
-                    Bucket: this.bucket,
-                    Key: this.key
+                s3Client.deleteObject({ Bucket: bucket, Key: key }, function(err, data) {
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        node.send({payload: null, key: key});
+                    } else {
+                        send({
+                            payload: data,
+                            key: key
+                        });
+                    }
+
+                    node.status({fill:"green",shape:"dot",text:`Done!`});
+                    // Finalize
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+    
+                    setTimeout(() => {
+                        node.status({});
+                    }, 3000);
                 });
 
-                // delete response.$metadata;
-                let responseMsg = `Done! Key: ${this.key}`;
-
-                send({
-                    payload: responseMsg
-                })
-                
-                node.status({fill:"yellow",shape:"dot",text:`Done!`});
-                // Finalize
-                this.s3Client.destroy();
-                done();
-
-                setTimeout(() => {
-                    node.status({});
-                }, 3000);
             }
             catch (err) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
