@@ -1,8 +1,9 @@
 {
   "name": "@digitalnodecom/node-red-contrib-generic-s3",
-  "version": "1.1.2",
+  "version": "1.2.1",
   "description": "Generic node-red S3 nodes",
   "node-red": {
+    "version": ">=3.0.0",
     "nodes": {
       "Generic S3": "generic-s3.js"
     }
@@ -24,6 +25,9 @@
   ],
   "scripts": {
     "test": "echo \"No test specified\""
+  },
+  "engines": {
+      "node": ">=12.0.0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.180.0"
