@@ -124,9 +124,12 @@ module.exports = function(RED) {
 
         // Make the handler for the input event async
         this.on("input", async function(msg,send,done) {
+
+            // S3 client init
+            let s3Client = null;
             try {
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -137,7 +140,7 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // Listing all the buckets and formatting the message
-                const response = await this.s3Client.listBuckets({});
+                const response = await s3Client.listBuckets({});
                 delete response.$metadata;
 
                 // Sending the message
@@ -145,10 +148,11 @@ module.exports = function(RED) {
                     payload: response
                 });
 
-                this.s3Client.destroy();
-
                 // Finalizing
-                done();
+                if(done) {
+                    s3Client.destroy();
+                    done();
+                }
 
                 node.status({fill:"green",shape:"dot",text:"Success"});
                 setTimeout(() => {
@@ -158,8 +162,9 @@ module.exports = function(RED) {
             catch (err) {
                 // If an error occurs
                 node.error(err);
-                this.s3Client.destroy();
-                done();
+                // Cleanup
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
                 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
