@@ -124,9 +124,12 @@ module.exports = function(RED) {
 
         // Make the handler for the input event async
         this.on("input", async function(msg,send,done) {
+
+            // S3 client init
+            let s3Client = null;
             try {
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -137,29 +140,35 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // Listing all the buckets and formatting the message
-                const response = await this.s3Client.listBuckets({});
-                delete response.$metadata;
-
-                // Sending the message
-                send({
-                    payload: response
+                s3Client.listBuckets({}, function(err, data) {
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        send({payload: null});
+                    } else {
+                        // Sending the message
+                        send({
+                            payload: data
+                        });
+                    }
+                    // Finalizing
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+    
+                    node.status({fill:"green",shape:"dot",text:"Success"});
+                    setTimeout(() => {
+                        node.status({});
+                    }, 2000);
                 });
-
-                this.s3Client.destroy();
-
-                // Finalizing
-                done();
-
-                node.status({fill:"green",shape:"dot",text:"Success"});
-                setTimeout(() => {
-                    node.status({});
-                }, 2000);
             }
             catch (err) {
                 // If an error occurs
                 node.error(err);
-                this.s3Client.destroy();
-                done();
+                // Cleanup
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
                 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
@@ -177,7 +186,7 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.bucket = n.bucket != "" ? n.bucket : null;
+        
 
         if (!config) {
             node.warn(RED._("Missing S3 Client Configuration!"));
@@ -185,18 +194,21 @@ module.exports = function(RED) {
         }
 
         this.on('input', async function(msg, send, done) {
-            if(!this.bucket) {
-                this.bucket = msg.bucket ? msg.bucket : null;
-                if(!this.bucket) {
+            let bucket = n.bucket != "" ? n.bucket : null;
+
+            if(!bucket) {
+                bucket = msg.bucket ? msg.bucket : null;
+                if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
             }
 
+            // S3 client init
+            let s3Client = null;
             try {
-
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -207,30 +219,38 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // List all objects from the desired bucket
-                const response = await this.s3Client.listObjects({
-                    Bucket: this.bucket
+                s3Client.listObjects({ Bucket: bucket }, function(err, data) {
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        send({payload: null, bucket: bucket});
+                    } else {
+
+                        send({
+                            payload: data,
+                            bucket: bucket
+                        });
+        
+                        // Finalize
+                        if(done) {
+                            s3Client.destroy();
+                            done();
+                        }
+        
+                        node.status({fill:"green",shape:"dot",text:"Success"});
+                        setTimeout(() => {
+                            node.status({});
+                        }, 2000);
+                    }
                 });
-                delete response.$metadata;
 
-                node.send({
-                    payload: response
-                });
-
-                // Finalize
-                this.s3Client.destroy();
-                done();
-
-                node.status({fill:"green",shape:"dot",text:"Success"});
-                setTimeout(() => {
-                    node.status({});
-                }, 2000);
             }
             catch (err) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
@@ -249,8 +269,6 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.bucket = n.bucket != "" ? n.bucket : null;
-        this.key = n.key != "" ? n.key : null;
 
         if (!config) {
             node.warn(RED._("Missing S3 Client Configuration!"));
@@ -258,27 +276,32 @@ module.exports = function(RED) {
         }
 
         this.on('input', async function(msg, send, done) {
+
+            let bucket = n.bucket != "" ? n.bucket : null;
+            let key = n.key != "" ? n.key : null;
             
             // Checking for correct properties input
-            if(!this.bucket) {
-                this.bucket = msg.bucket ? msg.bucket : null;
-                if(!this.bucket) {
+            if(!bucket) {
+                bucket = msg.bucket ? msg.bucket : null;
+                if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
             }
 
-            if(!this.key) {
-                this.key = msg.key ? msg.key : null;
-                if(!this.key) {
+            if(!key) {
+                key = msg.key ? msg.key : null;
+                if(!key) {
                     node.error('No object key provided!');
                     return;
                 }
             }
 
+            // S3 client init
+            let s3Client = null;
             try {
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -289,43 +312,40 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
 
-                const response = await this.s3Client.getObject({
-                   Bucket: this.bucket,
-                   Key: this.key 
-                });
-
-                const data = await streamToString(response.Body);
-                const metaData = response.Metadata;
-
-                delete response.Body;
-                delete response.Metadata;
-                delete response.$metadata;
-
-                // done();
-
-                send({
-                    payload: {
-                        Object: response,
-                        Data: data,
-                        MetaData: metaData
+                s3Client.getObject({ Bucket: bucket, Key: key }, async function(err, data) {
+                    // If an error occured, print the error
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        send({payload: null, key: key});
+                    } else { // if not, return message with the payload
+        
+                        send({
+                            payload: data,
+                            key: key
+                        });
+                        node.status({fill:"green",shape:"dot",text:"Success"});
                     }
+    
+                    // Finalize
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+    
+                    setTimeout(() => {
+                        node.status({});
+                    }, 2000);
+
                 });
 
-                // Finalize
-                this.s3Client.destroy();
-                done();
-
-                node.status({fill:"green",shape:"dot",text:"Success"});
-                setTimeout(() => {
-                    node.status({});
-                }, 2000);
             }
             catch (err) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
@@ -352,71 +372,75 @@ module.exports = function(RED) {
 
         this.on('input', async function(msg, send, done) {
 
-            this.bucket = n.bucket !== "" ? n.bucket : null; // Bucket info
-            this.key = n.key !== "" ? n.key : null; // Object key
-            this.body = n.body !== "" ? n.body : null; // Body of the object to upload
-            this.metadata = n.metadata !== "" ? n.metadata : null; // Metadata of the object
-            this.contentType = n.contentType !== "" ? n.contentType : null; // Content-Type of the object
+            let bucket = n.bucket !== "" ? n.bucket : null; // Bucket info
+            let key = n.key !== "" ? n.key : null; // Object key
+            let body = n.body !== "" ? n.body : null; // Body of the object to upload
+            let metadata = n.metadata !== "" ? n.metadata : null; // Metadata of the object
+            let contentType = n.contentType !== "" ? n.contentType : null; // Content-Type of the object
             
             // Checking for correct properties input
-            if(!this.bucket) {
-                this.bucket = msg.bucket ? msg.bucket : null;
-                if(!this.bucket) {
+            if(!bucket) {
+                bucket = msg.bucket ? msg.bucket : null;
+                if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
             }
 
-            if(!this.key) {
-                this.key = msg.key ? msg.key : null;
-                if(!this.key) {
+            if(!key) {
+                key = msg.key ? msg.key : null;
+                if(!key) {
                     node.error('No object key provided!');
                     return;
                 }
             }
             
-            if(!this.body) {
-                this.body = msg.body ? msg.body : null;
-                if(!this.body) {
+            if(!body) {
+                body = msg.body ? msg.body : null;
+                if(!body) {
                     node.error('No body data provided to put in the object!');
                     return;
                 }
             }
 
-            if(!isString(this.body)) {
+            if(!isString(body)) {
                 node.error('The body should be formatted as string!');
                 return;
             }
 
-            if(!this.contentType) {
-                this.contentType = msg.contentType ? msg.contentType : null;
-                if(!this.contentType) {
+            if(!contentType) {
+                contentType = msg.contentType ? msg.contentType : null;
+                if(!contentType) {
                     node.error('No Content-Type provided!');
                     return;
                 }
             }
 
-            if(!this.metadata) {
-                this.metadata = msg.metadata ? msg.metadata : null;
+            if(!metadata) {
+                metadata = msg.metadata ? msg.metadata : null;
             }
 
-            if(this.metadata) {
-                if(!isJsonString(this.metadata)) {
-                    if(!isObject(this.metadata)) {
+            if(metadata) {
+                if(!isJsonString(metadata)) {
+                    if(!isObject(metadata)) {
                         node.error('The metadata should be of type Object!');
                         return;
                     }
                 }
 
-                if(!isObject(this.metadata)) {
-                    this.metadata = JSON.parse(this.metadata);
+                if(!isObject(metadata)) {
+                    metadata = JSON.parse(metadata);
                 }
                 
             }
 
+            // S3 client init
+            let s3Client = null;
+
             try {
+
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -427,73 +451,83 @@ module.exports = function(RED) {
 
                 // Converting body from string to stream
                 // since the sdk requires stream for upload
-                const streamifiedBody = stringToStream(this.body);
+                const streamifiedBody = stringToStream(body);
                 if(!streamifiedBody) {
                     node.error('Failed to streamify body. Body needs to be a string!');
-                    done();
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    } 
                     return;
                 }
 
                 // Calculating MD5 od the body
-                const MD5 = crypto.createHash('md5').update(this.body).digest("hex");
+                const MD5 = crypto.createHash('md5').update(body).digest("hex");
 
                 // Fetching HeadData (Metadata) for the object that is being upserted or inserted
                 let objectMeta = {};
                 try{
-                    objectMeta = await this.s3Client.headObject({
-                        Bucket: this.bucket,
-                        Key: this.key
+                    objectMeta = await s3Client.headObject({
+                        Bucket: bucket,
+                        Key: key
                     });
                     let ETag = objectMeta.ETag.substring(1, objectMeta.ETag.length - 1); // Formatting the ETag
                     
                     // Checking if the existing object data is exactly the same as the request message
                     if(ETag == MD5) {
-                        node.warn(`The object ${this.key} has not been upserted since the body of the existing object is exactly the same`);
-                        this.s3Client.destroy();
-                        done();
+                        node.warn(`The object ${key} has not been upserted since the body of the existing object is exactly the same`);
+                        send({payload: null, key: key});
+                        if(done) done();
                         return;
                     }
                 } catch (e) {
                     // If the object does not exist, continue with inserting
                 }
 
-
                 // Creating the upload object
                 let objectToCreate = {
-                    Bucket: this.bucket,
-                    Key: this.key,
-                    ContentType: this.contentType,
+                    Bucket: bucket,
+                    Key: key,
+                    ContentType: contentType,
                     Body: streamifiedBody
                 };
                 
-                if(this.metadata) objectToCreate.Metadata = this.metadata;
+                if(metadata) objectToCreate.Metadata = metadata;
 
                 // Uploading
                 node.status({fill:"blue",shape:"dot",text:"Uploading"});
-                const response = await this.s3Client.putObject(objectToCreate);
+                s3Client.putObject(objectToCreate, function(error, data) {
+                    // If an error occured, print the error
+                    if(error) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(error);
+                        send({payload: null, key: key});
+                    } else {  // if not, return message with the payload
+                        send({
+                            payload: data,
+                            key: key
+                        }); 
+                        node.status({fill:"green",shape:"dot",text:`Success`});
+                    }
 
-                // Formatting and returning the response
-                delete response.$metadata;
-                node.send({
-                    payload: response
+                    // Finalize
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+                    // Clear node's status
+                    setTimeout(() => {
+                        node.status({});
+                    }, 5000);
                 });
-
-                // Finalize
-                this.s3Client.destroy();
-                done();
-
-                node.status({fill:"green",shape:"dot",text:`Success`});
-                setTimeout(() => {
-                    node.status({});
-                }, 5000);
             }
             catch (err) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
-
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
+                
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
                     node.status({});
@@ -510,7 +544,6 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.objects = n.objects != "" ? n.objects : null; // Bucket info
 
         // If there is no conifg
         if (!config) {
@@ -520,34 +553,39 @@ module.exports = function(RED) {
 
         this.on('input', async function(msg, send, done) {
             
+            let objects = n.objects != "" ? n.objects : null; // Bucket info
+
             // Checking for correct properties input
-            if(!this.objects) {
-                this.objects = msg.objects ? msg.objects : null;
+            if(!objects) {
+                objects = msg.objects ? msg.objects : null;
                 
-                if(!isJsonString(this.objects)) {
-                    if(!Array.isArray(this.objects)) {
+                if(!isJsonString(objects)) {
+                    if(!Array.isArray(objects)) {
                         node.error('Invalid objects input format!');
                         return;
                     }
                 }
 
-                if(isJsonString(this.objects))
-                    this.objects = JSON.parse(this.objects);
+                if(isJsonString(objects))
+                    this.objects = JSON.parse(objects);
 
-                if(!Array.isArray(this.objects)) {
+                if(!Array.isArray(objects)) {
                     node.error('The provided input for objects is not an array!');
                     return;
                 }
 
-                if(!isValidInputObjectArray(this.objects)) {
+                if(!isValidInputObjectArray(objects)) {
                     node.error('The provided array\'s objects are not in valid format!');
                     return;
                 }
             }
 
+            // S3 client init
+            let s3Client = null;
+
             try {
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -557,15 +595,15 @@ module.exports = function(RED) {
                 });
 
                 // Creating the upload object
-                let inputObjects = this.objects;
+                let inputObjects = objects;
                 // let inputObjects = createS3formatInputObjectArray(this.objects);
                 let objectsToPut = [];
 
-                node.status({fill:"blue",shape:"dot",text:"Comparison 0%"});
+                node.status({fill:"blue",shape:"ring",text:"Comparison"});
                 for(let i = 0; i < inputObjects.length; i++) {
-                    node.status({fill: "blue", shape: "dot", text: `Comparison ${parseInt((i/inputObjects.length) * 100)}%`});
+                    node.status({fill: "blue", shape: "ring", text: `Comparison ${parseInt((i/inputObjects.length) * 100)}%`});
                     try {
-                        let objectMeta = await this.s3Client.headObject({
+                        let objectMeta = await s3Client.headObject({
                             Bucket: inputObjects[i].bucket,
                             Key: inputObjects[i].key
                         });
@@ -583,15 +621,36 @@ module.exports = function(RED) {
                     }
                 }
 
+                // Formatting the array into appropriate S3 SDK input array
                 objectsToPut = createS3formatInputObjectArray(objectsToPut);
+
+                if(objectsToPut.length == 0) {
+                    send({payload: null});
+                    node.warn('All of the objects are exactly the same as the already existing ones in the specified bucket!');
+                    node.status({fill:"yellow",shape:"dot",text:"No objects uploaded!"});
+                    
+                    // Cleanup
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+
+                    setTimeout(() => {
+                        node.status({});
+                    }, 5000);
+
+                    return;
+                }
                 
                 // Uploading
-                node.status({fill:"blue",shape:"dot",text:"Uploading 0%"});
+                node.status({fill:"blue",shape:"dot",text:"Uploading"});
                 let responses = [];
                 for(let i = 0; i < objectsToPut.length; i++) {
-                    // node.warn(objectsToPut[i])
-                    let response = await this.s3Client.putObject(objectsToPut[i]);
-                    response.Key = objectsToPut[i].Key;
+                    let response = {
+                        payload: {},
+                        key: objectsToPut[i].Key
+                    }
+                    response.payload = await s3Client.putObject(objectsToPut[i]);
                     responses.push(response)
                     node.status({fill: "blue", shape: "dot", text: `Uploading ${parseInt((i/objectsToPut.length) * 100)}%`});
                 }
@@ -602,8 +661,10 @@ module.exports = function(RED) {
                 });
 
                 // Finalize
-                this.s3Client.destroy();
-                done();
+                if(done) {
+                    s3Client.destroy();
+                    done();
+                }
 
                 node.status({fill:"green",shape:"dot",text:`Success`});
                 setTimeout(() => {
@@ -614,8 +675,8 @@ module.exports = function(RED) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
@@ -633,8 +694,6 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.bucket = n.bucket != "" ? n.bucket : null; // Bucket info
-        this.key = n.key != "" ? n.key : null; // Object key
 
 
         // If there is no conifg
@@ -645,28 +704,31 @@ module.exports = function(RED) {
 
 
         this.on('input',  async function(msg, send, done) {
+            let bucket = n.bucket != "" ? n.bucket : null; // Bucket info
+            let key = n.key != "" ? n.key : null; // Object key
 
             // Checking for correct properties input
-            if(!this.bucket) {
-                this.bucket = msg.bucket ? msg.bucket : null;
-                if(!this.bucket) {
+            if(!bucket) {
+                bucket = msg.bucket ? msg.bucket : null;
+                if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
             }
 
-            if(!this.key) {
-                this.key = msg.key ? msg.key : null;
-                if(!this.key) {
+            if(!key) {
+                key = msg.key ? msg.key : null;
+                if(!key) {
                     node.error('No object key provided!');
                     return;
                 }
             }
 
-
+            // S3 client init
+            let s3Client = null;
             try {
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -676,33 +738,37 @@ module.exports = function(RED) {
                 });
 
                 node.status({fill:"blue",shape:"dot",text:"Deleting"});
-                const response = await this.s3Client.deleteObject({
-                    Bucket: this.bucket,
-                    Key: this.key
+                s3Client.deleteObject({ Bucket: bucket, Key: key }, function(err, data) {
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        send({payload: null, key: key});
+                    } else {
+                        send({
+                            payload: data,
+                            key: key
+                        });
+                    }
+
+                    node.status({fill:"green",shape:"dot",text:`Done!`});
+                    // Finalize
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+    
+                    setTimeout(() => {
+                        node.status({});
+                    }, 3000);
                 });
 
-                // delete response.$metadata;
-                let responseMsg = `Done! Key: ${this.key}`;
-
-                send({
-                    payload: responseMsg
-                })
-                
-                node.status({fill:"yellow",shape:"dot",text:`Done!`});
-                // Finalize
-                this.s3Client.destroy();
-                done();
-
-                setTimeout(() => {
-                    node.status({});
-                }, 3000);
             }
             catch (err) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
@@ -722,7 +788,6 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.bucket = n.bucket != "" ? n.bucket : null; // Bucket info
 
         // If there is no conifg
         if (!config) {
@@ -732,18 +797,20 @@ module.exports = function(RED) {
 
         this.on('input',  async function(msg, send, done) {
 
+            let bucket = n.bucket != "" ? n.bucket : null; // Bucket info
             // Checking for correct properties input
-            if(!this.bucket) {
-                this.bucket = msg.bucket ? msg.bucket : null;
-                if(!this.bucket) {
+            if(!bucket) {
+                bucket = msg.bucket ? msg.bucket : null;
+                if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
             }
 
+            let s3Client = null;
             try {
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -754,31 +821,38 @@ module.exports = function(RED) {
 
                 // Creating bucket
                 node.status({fill:"blue",shape:"dot",text:"Creating Bucket"});
-                const response = await this.s3Client.createBucket({
-                    Bucket: this.bucket
-                })
+                s3Client.createBucket({ Bucket: bucket }, function(err, data) {
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        send({payload: null, bucket: bucket});
+                    } else {
+                        send({
+                            payload: data,
+                            bucket: bucket
+                        })
+                        node.status({fill:"green",shape:"dot",text:"Success"});
+                    }
 
-                // Returning response
-                delete response.$metadata;
-                send({
-                    payload: response
-                })
-                
-                node.status({fill:"green",shape:"dot",text:`Created!`});
-                // Finalize
-                this.s3Client.destroy();
-                done();
+                    node.status({fill:"green",shape:"dot",text:`Created!`});
+                    // Finalize
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+    
+                    setTimeout(() => {
+                        node.status({});
+                    }, 3000);
+                });
 
-                setTimeout(() => {
-                    node.status({});
-                }, 3000);
             }
             catch (err) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
@@ -790,6 +864,4 @@ module.exports = function(RED) {
     }
 
     RED.nodes.registerType('Create Bucket', S3CreateBucket);
-
-    // Function node
 };
