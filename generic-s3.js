@@ -182,7 +182,7 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        this.bucket = n.bucket != "" ? n.bucket : null;
+        
 
         if (!config) {
             node.warn(RED._("Missing S3 Client Configuration!"));
@@ -190,18 +190,21 @@ module.exports = function(RED) {
         }
 
         this.on('input', async function(msg, send, done) {
-            if(!this.bucket) {
-                this.bucket = msg.bucket ? msg.bucket : null;
-                if(!this.bucket) {
+            let bucket = n.bucket != "" ? n.bucket : null;
+
+            if(!bucket) {
+                bucket = msg.bucket ? msg.bucket : null;
+                if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
             }
 
+            // S3 client init
+            let s3Client = null;
             try {
-
                 // Creating S3 client
-                this.s3Client = new S3({
+                s3Client = new S3({
                     endpoint: config.endpoint,
                     region: config.region,
                     credentials: {
@@ -212,18 +215,20 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // List all objects from the desired bucket
-                const response = await this.s3Client.listObjects({
-                    Bucket: this.bucket
+                const response = await s3Client.listObjects({
+                    Bucket: bucket
                 });
                 delete response.$metadata;
 
-                node.send({
+                send({
                     payload: response
                 });
 
                 // Finalize
-                this.s3Client.destroy();
-                done();
+                if(done) {
+                    s3Client.destroy();
+                    done();
+                }
 
                 node.status({fill:"green",shape:"dot",text:"Success"});
                 setTimeout(() => {
@@ -234,8 +239,8 @@ module.exports = function(RED) {
                 // If error occurs
                 node.error(err);
                 // Cleanup
-                this.s3Client.destroy();
-                done();
+                if(s3Client !== null) s3Client.destroy();
+                if(done) done();
 
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
@@ -565,7 +570,7 @@ module.exports = function(RED) {
                 }
             }
 
-            // S# client init
+            // S3 client init
             let s3Client = null;
 
             try {
