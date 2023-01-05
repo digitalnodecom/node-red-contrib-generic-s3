@@ -140,24 +140,28 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // Listing all the buckets and formatting the message
-                const response = await s3Client.listBuckets({});
-                delete response.$metadata;
-
-                // Sending the message
-                send({
-                    payload: response
+                s3Client.listBuckets({}, function(err, data) {
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        send({payload: null});
+                    } else {
+                        // Sending the message
+                        send({
+                            payload: data
+                        });
+                    }
+                    // Finalizing
+                    if(done) {
+                        s3Client.destroy();
+                        done();
+                    }
+    
+                    node.status({fill:"green",shape:"dot",text:"Success"});
+                    setTimeout(() => {
+                        node.status({});
+                    }, 2000);
                 });
-
-                // Finalizing
-                if(done) {
-                    s3Client.destroy();
-                    done();
-                }
-
-                node.status({fill:"green",shape:"dot",text:"Success"});
-                setTimeout(() => {
-                    node.status({});
-                }, 2000);
             }
             catch (err) {
                 // If an error occurs
@@ -219,7 +223,7 @@ module.exports = function(RED) {
                     if(err) {
                         node.status({fill:"red",shape:"dot",text:`Failure`});
                         node.error(err);
-                        node.send({payload: null, bucket: bucket});
+                        send({payload: null, bucket: bucket});
                     } else {
 
                         send({
@@ -313,7 +317,7 @@ module.exports = function(RED) {
                     if(err) {
                         node.status({fill:"red",shape:"dot",text:`Failure`});
                         node.error(err);
-                        node.send({payload: null, key: key});
+                        send({payload: null, key: key});
                     } else { // if not, return message with the payload
         
                         send({
@@ -471,8 +475,8 @@ module.exports = function(RED) {
                     
                     // Checking if the existing object data is exactly the same as the request message
                     if(ETag == MD5) {
-                        node.warn(`The object ${msg.key} has not been upserted since the body of the existing object is exactly the same`);
-                        send({payload: null, key: msg.key});
+                        node.warn(`The object ${key} has not been upserted since the body of the existing object is exactly the same`);
+                        send({payload: null, key: key});
                         if(done) done();
                         return;
                     }
@@ -497,12 +501,12 @@ module.exports = function(RED) {
                     if(error) {
                         node.status({fill:"red",shape:"dot",text:`Failure`});
                         node.error(error);
+                        send({payload: null, key: key});
                     } else {  // if not, return message with the payload
-                        let response = {
+                        send({
                             payload: data,
-                        }
-                        response.payload.key = key;
-                        send(response); 
+                            key: key
+                        }); 
                         node.status({fill:"green",shape:"dot",text:`Success`});
                     }
 
@@ -738,7 +742,7 @@ module.exports = function(RED) {
                     if(err) {
                         node.status({fill:"red",shape:"dot",text:`Failure`});
                         node.error(err);
-                        node.send({payload: null, key: key});
+                        send({payload: null, key: key});
                     } else {
                         send({
                             payload: data,
