@@ -215,25 +215,31 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // List all objects from the desired bucket
-                const response = await s3Client.listObjects({
-                    Bucket: bucket
+                s3Client.listObjects({ Bucket: bucket }, function(err, data) {
+                    if(err) {
+                        node.status({fill:"red",shape:"dot",text:`Failure`});
+                        node.error(err);
+                        node.send({payload: null, bucket: bucket});
+                    } else {
+
+                        send({
+                            payload: data,
+                            bucket: bucket
+                        });
+        
+                        // Finalize
+                        if(done) {
+                            s3Client.destroy();
+                            done();
+                        }
+        
+                        node.status({fill:"green",shape:"dot",text:"Success"});
+                        setTimeout(() => {
+                            node.status({});
+                        }, 2000);
+                    }
                 });
-                delete response.$metadata;
 
-                send({
-                    payload: response
-                });
-
-                // Finalize
-                if(done) {
-                    s3Client.destroy();
-                    done();
-                }
-
-                node.status({fill:"green",shape:"dot",text:"Success"});
-                setTimeout(() => {
-                    node.status({});
-                }, 2000);
             }
             catch (err) {
                 // If error occurs
