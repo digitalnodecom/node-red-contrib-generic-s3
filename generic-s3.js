@@ -644,6 +644,7 @@ module.exports = function(RED) {
         this.on('input', async function(msg, send, done) {
             
             let objects = n.objects != "" ? n.objects : null; // Bucket info
+            let upsert = n.upsert ? n.upsert : false; // Upsert flag
 
             // Checking for correct properties input
             if(!objects) {
@@ -670,6 +671,10 @@ module.exports = function(RED) {
                 }
             }
 
+            if(!upsert) {
+                upsert = msg.upsert ? msg.upsert : false;
+            }
+
             // S3 client init
             let s3Client = null;
 
@@ -688,27 +693,30 @@ module.exports = function(RED) {
                 let inputObjects = objects;
                 // let inputObjects = createS3formatInputObjectArray(this.objects);
                 let objectsToPut = [];
-
-                node.status({fill:"blue",shape:"ring",text:"Comparison"});
-                for(let i = 0; i < inputObjects.length; i++) {
-                    node.status({fill: "blue", shape: "ring", text: `Comparison ${parseInt((i/inputObjects.length) * 100)}%`});
-                    try {
-                        let objectMeta = await s3Client.headObject({
-                            Bucket: inputObjects[i].bucket,
-                            Key: inputObjects[i].key
-                        });
-                        
-                        let ETag = objectMeta.ETag.substring(1, objectMeta.ETag.length - 1); // Formatting the ETag
-                        const MD5 = crypto.createHash('md5').update(inputObjects[i].body).digest("hex");     
-
-                        // Checking if the existing object data is exactly the same as the request message
-                        if(ETag != MD5) {
+                if(upsert) {
+                    node.status({fill:"blue",shape:"ring",text:"Comparison"});
+                    for(let i = 0; i < inputObjects.length; i++) {
+                        node.status({fill: "blue", shape: "ring", text: `Comparison ${parseInt((i/inputObjects.length) * 100)}%`});
+                        try {
+                            let objectMeta = await s3Client.headObject({
+                                Bucket: inputObjects[i].bucket,
+                                Key: inputObjects[i].key
+                            });
+                            
+                            let ETag = objectMeta.ETag.substring(1, objectMeta.ETag.length - 1); // Formatting the ETag
+                            const MD5 = crypto.createHash('md5').update(inputObjects[i].body).digest("hex");     
+    
+                            // Checking if the existing object data is exactly the same as the request message
+                            if(ETag != MD5) {
+                                objectsToPut.push(inputObjects[i]);
+                            }
+    
+                        } catch (e) {
                             objectsToPut.push(inputObjects[i]);
                         }
-
-                    } catch (e) {
-                        objectsToPut.push(inputObjects[i]);
                     }
+                } else {
+                    objectsToPut = inputObjects;
                 }
 
                 // Formatting the array into appropriate S3 SDK input array

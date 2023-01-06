@@ -309,12 +309,17 @@
         <label for="node-input-objects"><i class="fa fa-file"></i> <span data-i18n="Objects">&nbsp;</span>Objects: </label>
         <input type="text" id="node-input-objects" data-i18n="[placeholder][{JSON}, {JSON}, ...]">
     </div>
+    <div class="form-row">
+        <label for="node-input-upsert"><i class="fa fa-superpowers"></i> <span data-i18n="Upsert">&nbsp;</span>Upsert: </label>
+        <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-upsert">
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
             <li><span data-i18n="[html]tip1">If you are setting Objects using this node, make sure it is in valid, format as specified in the placeholder. The objects field needs to be an array of objects. Leave <code>Objects</code> field blank if you are setting it via msg property. E.g.:
                 <ul>
                     <li><code>msg.objects = [{</br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; key: "unique-object-key.json", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bucket: "test-bucket", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; body: "some data", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; contentType: "application/json", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; metadata(optional): { version: '123' } </br> &nbsp;&nbsp;&nbsp;}]</code></li> 
+                    <li><code>msg.upsert = true</code></li>
                 </ul>
             </li>
         </ul>
@@ -322,19 +327,13 @@
 </script>
 
 <script type="text/x-red" data-help-name="Put Objects">
-    <p>S3 put object node. This node is used to create or update object
-    and(or) object's metadata with a specific key within a specified bucket.
-    <code>Bucket</code> - The bucket |
-    <code>Key</code> - The object key | 
-    <code>Content-Type</code> - Content-Type of the object's data | 
-    <code>Body</code> - Actual contents of the object | 
-    <code>Metadata</code> - (Optional) Metadata of the object<br>
+    <p>S3 put object node. This node is used to create or update objects
+    and(or) objects' metadata with a specific key within a specified bucket.
+    <code>Objects</code> - The objects |
+    <code>Upsert</code> - (Optional) Specifies wether the objects should be upserted or not<br>
     These values can be specified in the node properites or by setting input properties like the following
-    <code>msg.bucket</code> - The bucket |
-    <code>msg.key</code> - The object key | 
-    <code>msg.contentType</code> - Content-Type of the object's data | 
-    <code>msg.body</code> - Actual contents of the object | 
-    <code>msg.metadata</code> - (Optional) Metadata of the object</p>
+    <code>msg.objects</code> - The objects |
+    <code>msg.metadata</code> - (Optional) Specifies wether the objects should be upserted or not</p>
 </script>
 
 <script type="text/javascript">
@@ -345,6 +344,7 @@
             name: {value: ""},
             conf: {type:"client-s3", required:true},
             objects: {type: 'text', required: false},
+            upsert: {required: false}
         },
         inputs: 1,
         outputs: 1,
