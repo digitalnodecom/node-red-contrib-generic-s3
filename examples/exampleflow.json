@@ -1,6 +1,6 @@
 [
     {
-        "id": "b5a6eddecd22afb2",
+        "id": "10dfe84c0519b3f8",
         "type": "tab",
         "label": "Generic S3 Node examples",
         "disabled": false,
@@ -8,9 +8,9 @@
         "env": []
     },
     {
-        "id": "7181c57409b1e292",
+        "id": "70a251cba8568c12",
         "type": "inject",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "inject",
         "props": [
             {
@@ -28,14 +28,14 @@
         "y": 260,
         "wires": [
             [
-                "23951f06292fe6ed"
+                "a6f484a9ff06240e"
             ]
         ]
     },
     {
-        "id": "60163975eea62dd9",
+        "id": "4a068ca588891451",
         "type": "debug",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "Debug",
         "active": true,
         "tosidebar": true,
@@ -50,23 +50,23 @@
         "wires": []
     },
     {
-        "id": "23951f06292fe6ed",
+        "id": "a6f484a9ff06240e",
         "type": "List Buckets",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "conf": "",
         "name": "",
         "x": 490,
         "y": 260,
         "wires": [
             [
-                "60163975eea62dd9"
+                "4a068ca588891451"
             ]
         ]
     },
     {
-        "id": "c966ada9f3ca73ae",
+        "id": "de2711e170e52ad5",
         "type": "List Objects",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "",
         "conf": "",
         "bucket": "test-node-bucket",
@@ -74,14 +74,14 @@
         "y": 300,
         "wires": [
             [
-                "60163975eea62dd9"
+                "4a068ca588891451"
             ]
         ]
     },
     {
-        "id": "b8b594aa1893d782",
+        "id": "6453688790e8064a",
         "type": "inject",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "inject",
         "props": [
             {
@@ -99,14 +99,14 @@
         "y": 300,
         "wires": [
             [
-                "de797d96f9eaca90"
+                "db086a849cd7c085"
             ]
         ]
     },
     {
-        "id": "01688e3f4f351778",
+        "id": "ec5979616734fbe1",
         "type": "Get Object",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "Fetch Object",
         "conf": "",
         "bucket": "",
@@ -115,14 +115,14 @@
         "y": 340,
         "wires": [
             [
-                "60163975eea62dd9"
+                "4a068ca588891451"
             ]
         ]
     },
     {
-        "id": "a06bf248fd60b4c5",
+        "id": "5c26f18bcdefa983",
         "type": "inject",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "inject",
         "props": [
             {
@@ -140,32 +140,33 @@
         "y": 340,
         "wires": [
             [
-                "5d31d9c102af85eb"
+                "7e5e70c5c9f79323"
             ]
         ]
     },
     {
-        "id": "36073e872c628c8e",
+        "id": "9749ee95ae50c8b0",
         "type": "Put Object",
-        "z": "b5a6eddecd22afb2",
-        "name": "Upload Object",
+        "z": "10dfe84c0519b3f8",
+        "name": "",
         "conf": "",
         "bucket": "",
         "key": "",
         "contentType": "",
         "body": "",
-        "x": 480,
+        "upsert": false,
+        "x": 490,
         "y": 420,
         "wires": [
             [
-                "60163975eea62dd9"
+                "4a068ca588891451"
             ]
         ]
     },
     {
-        "id": "688ca5b72fd1cb82",
+        "id": "b57c364c9058e69d",
         "type": "inject",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "inject",
         "props": [
             {
@@ -183,16 +184,16 @@
         "y": 420,
         "wires": [
             [
-                "e442a24a9b7fbd74"
+                "98bd3f09ab06e257"
             ]
         ]
     },
     {
-        "id": "e442a24a9b7fbd74",
+        "id": "98bd3f09ab06e257",
         "type": "function",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "Parameters",
-        "func": "// File contents, in this example object that is later stringified in json\nconst testJson = {\n    \"Data\": {\n        \"Exists\": true,\n        \"Testing\": \"Dummy data\"\n    },\n    \"Something\": \"Other dummy data\",\n    \"Changes\": true\n}\n\n// Parameters that are later passed to create the object\nconst objectToCreate = {\n    Bucket: 'test-node-bucket',\n    Key: 'TestFile.json',\n    ContentType: 'application/json',\n    Body: JSON.stringify(testJson),\n    Metadata: {\n        \"test\": \"Test MetaData\"\n    }\n}\n\n// Bucket in which the object is going to be created\nmsg.bucket = objectToCreate.Bucket;\n// Object's unique identifier\nmsg.key = objectToCreate.Key;\n// Content type of the object\nmsg.contentType = objectToCreate.ContentType;\n// Object body\nmsg.body = objectToCreate.Body;\n// Metadata for the object\nmsg.metadata = objectToCreate.Metadata;\n\nreturn msg;",
+        "func": "// File contents, in this example object that is later stringified in json\nconst testJson = {\n    \"Data\": {\n        \"Exists\": true,\n        \"Testing\": \"Dummy data\"\n    },\n    \"Something\": \"Other dummy data\",\n    \"Changes\": true\n}\n\n// Parameters that are later passed to create the object\nconst objectToCreate = {\n    Bucket: 'test-node-bucket',\n    Key: 'TestFile.json',\n    ContentType: 'application/json',\n    Body: JSON.stringify(testJson),\n    Metadata: {\n        \"test\": \"Test MetaData\"\n    }\n}\n\n// Bucket in which the object is going to be created\nmsg.bucket = objectToCreate.Bucket;\n// Object's unique identifier\nmsg.key = objectToCreate.Key;\n// Content type of the object\nmsg.contentType = objectToCreate.ContentType;\n// Object body\nmsg.body = objectToCreate.Body;\n// Metadata for the object\nmsg.metadata = objectToCreate.Metadata;\n// Upsert flag for the node\nmsg.upsert = true;\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -202,30 +203,30 @@
         "y": 420,
         "wires": [
             [
-                "36073e872c628c8e"
+                "9749ee95ae50c8b0"
             ]
         ]
     },
     {
-        "id": "7a030fca6feacfb9",
+        "id": "0e02b83aa957f707",
         "type": "Delete Object",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "",
         "conf": "",
         "bucket": "",
         "key": "",
         "x": 480,
-        "y": 460,
+        "y": 500,
         "wires": [
             [
-                "60163975eea62dd9"
+                "4a068ca588891451"
             ]
         ]
     },
     {
-        "id": "83e7c51a59544fc1",
+        "id": "f96afd4883036a5f",
         "type": "inject",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "inject",
         "props": [
             {
@@ -240,36 +241,36 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 460,
+        "y": 500,
         "wires": [
             [
-                "77c8292adb5b466f"
+                "114f5aacf0abe215"
             ]
         ]
     },
     {
-        "id": "77c8292adb5b466f",
+        "id": "114f5aacf0abe215",
         "type": "function",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "Parameters",
-        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n\n// Unique key with which the object is identified for the object that you want to delete\nmsg.key = 'TestFile.json';\n\nreturn msg;",
+        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified for the object that you want to delete\nmsg.key = 'TestFile.json';\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 460,
+        "y": 500,
         "wires": [
             [
-                "7a030fca6feacfb9"
+                "0e02b83aa957f707"
             ]
         ]
     },
     {
-        "id": "6405e1963c97d822",
+        "id": "094730a56749a770",
         "type": "Create Bucket",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "",
         "conf": "",
         "bucket": "",
@@ -277,14 +278,14 @@
         "y": 380,
         "wires": [
             [
-                "60163975eea62dd9"
+                "4a068ca588891451"
             ]
         ]
     },
     {
-        "id": "5fd9a11f2d69f735",
+        "id": "a4b5d4bd221b28c1",
         "type": "inject",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "inject",
         "props": [
             {
@@ -302,14 +303,14 @@
         "y": 380,
         "wires": [
             [
-                "71240955c22e3cfd"
+                "fabb189b712944a1"
             ]
         ]
     },
     {
-        "id": "de797d96f9eaca90",
+        "id": "db086a849cd7c085",
         "type": "function",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "Parameters",
         "func": "// Name of the bucket from which you want to list the objects\nmsg.bucket = 'test-node-bucket';\n\nreturn msg;",
         "outputs": 1,
@@ -321,16 +322,16 @@
         "y": 300,
         "wires": [
             [
-                "c966ada9f3ca73ae"
+                "de2711e170e52ad5"
             ]
         ]
     },
     {
-        "id": "5d31d9c102af85eb",
+        "id": "7e5e70c5c9f79323",
         "type": "function",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "Parameters",
-        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n\nreturn msg;",
+        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -340,14 +341,14 @@
         "y": 340,
         "wires": [
             [
-                "01688e3f4f351778"
+                "ec5979616734fbe1"
             ]
         ]
     },
     {
-        "id": "71240955c22e3cfd",
+        "id": "fabb189b712944a1",
         "type": "function",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "Parameters",
         "func": "// Name of the bucket that you want to create\nmsg.bucket = 'test-node-bucket';\n\nreturn msg;",
         "outputs": 1,
@@ -359,18 +360,78 @@
         "y": 380,
         "wires": [
             [
-                "6405e1963c97d822"
+                "094730a56749a770"
             ]
         ]
     },
     {
-        "id": "3df958ecffaf4672",
+        "id": "2cf760e6cfada772",
         "type": "comment",
-        "z": "b5a6eddecd22afb2",
+        "z": "10dfe84c0519b3f8",
         "name": "README",
         "info": "In order for this to work, first you will need to configure S3 client with the defined properties which are used by the nodes\n\nYou can access this configuration node anytime by going into the configuration nodes, under `client-s3 `",
         "x": 120,
         "y": 80,
         "wires": []
+    },
+    {
+        "id": "8ba89dc8e38f61b2",
+        "type": "inject",
+        "z": "10dfe84c0519b3f8",
+        "name": "inject",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 460,
+        "wires": [
+            [
+                "01744c5877721e69"
+            ]
+        ]
+    },
+    {
+        "id": "01744c5877721e69",
+        "type": "function",
+        "z": "10dfe84c0519b3f8",
+        "name": "Parameters",
+        "func": "// Test Json that is the body of the objects\nconst testJson = {\n    \"Data\": {\n        \"Exists\": true,\n        \"Testing\": \"Dummy data\"\n    },\n    \"Something\": \"Other dummy data\",\n    \"Changes\": true,\n    \"Counter\": 0\n}\n\n// Creating an array of objects that are going to be inserted\nlet objects = [];\nfor (let i = 0; i < 100; i++) {\n\n    // Tweaking the body of the object\n    testJson.Counter = i;\n    let newObj = {};\n\n    // Creating the object\n    newObj = {\n        key: `${i}_${i * 100}.json`,\n        contentType: \"application/json\",\n        body: JSON.stringify(testJson),\n        bucket: 'testing-node-bucket',\n    };\n\n    // Putting all the objects in an array because the Put Objects node as input takes an array \n    objects.push(newObj);\n}\n\n// Objects array\nmsg.objects = objects;\n// Upsert flag for the node\nmsg.upsert = false;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 460,
+        "wires": [
+            [
+                "b528b978712ae1b0"
+            ]
+        ]
+    },
+    {
+        "id": "b528b978712ae1b0",
+        "type": "Put Objects",
+        "z": "10dfe84c0519b3f8",
+        "name": "",
+        "conf": "",
+        "objects": "",
+        "upsert": false,
+        "x": 490,
+        "y": 460,
+        "wires": [
+            [
+                "4a068ca588891451"
+            ]
+        ]
     }
 ]
