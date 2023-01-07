@@ -213,7 +213,6 @@ module.exports = function(RED) {
             payloadConfig.Bucket = bucket;
 
             // max-keys parameter
-
             let maxkeys = n.maxkeys != "" ? Number(n.maxkeys) : null;
             if(!maxkeys) {
                 maxkeys = msg.maxkeys ? msg.maxkeys : null;
@@ -223,6 +222,10 @@ module.exports = function(RED) {
                     node.error('The maxkeys should be of type Integer!');
                     return;
                 } else {
+                    if(maxkeys < 0) {
+                        node.error('The maxkeys properties should be positive number!');
+                        return;
+                    }
                     payloadConfig.MaxKeys = maxkeys;
                 }
             }
@@ -233,7 +236,7 @@ module.exports = function(RED) {
                 marker = msg.marker ? msg.marker : null;
             }
             if(marker) {
-                payloadConfig.marker = marker
+                payloadConfig.Marker = marker
             }
 
             // prefix parameter
@@ -242,7 +245,7 @@ module.exports = function(RED) {
                 prefix = msg.prefix ? msg.prefix : null;
             }
             if(prefix) {
-                payloadConfig.prefix = prefix
+                payloadConfig.Prefix = prefix
             }
 
             // S3 client init
@@ -260,7 +263,7 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // List all objects from the desired bucket
-                s3Client.listObjects(payloadConfig, function(err, data) {
+                s3Client.listObjectsV2(payloadConfig, function(err, data) {
                     if(err) {
                         node.status({fill:"red",shape:"dot",text:`Failure`});
                         node.error(err);
