@@ -35,7 +35,7 @@
     (function() {
         RED.nodes.registerType('client-s3',{
             category: 'config',
-            defaults: { 
+            defaults: {
                 name: {type: 'text', value: ""},
                 endpoint: {type: 'text', required: true, validate: RED.validators.regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/) },
                 region: {type: 'text', required: true},
@@ -82,7 +82,7 @@
         outputs: 1,
         icon: "s3Logo.png",
         // icon: "font-awesome/fa-automobile",
-        label: function() { 
+        label: function() {
             return this.name ? this.name : "List Buckets";
         }
     });
@@ -100,15 +100,30 @@
         <input type="text" id="node-input-conf">
     </div>
     <div class="form-row">
-        <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <label for="node-input-bucket"><i class="fa fa-database"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
         <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxkeys"><i class="fa fa-list-ol"></i> <span data-i18n="Max keys">&nbsp;</span>Max keys: </label>
+        <input type="number" id="node-input-maxkeys" data-i18n="[placeholder]1000">
+    </div>
+    <div class="form-row">
+        <label for="node-input-marker"><i class="fa fa-map-pin"></i> <span data-i18n="Marker">&nbsp;</span>Marker: </label>
+        <input type="text" id="node-input-marker" data-i18n="[placeholder]example-file.json">
+    </div>
+    <div class="form-row">
+        <label for="node-input-prefix"><i class="fa fa-indent"></i> <span data-i18n="Prefix">&nbsp;</span>Prefix: </label>
+        <input type="text" id="node-input-prefix" data-i18n="[placeholder]exmp">
     </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
-            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> field blank if you are setting it via msg property. E.g.: 
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> field blank if you are setting it via msg property. E.g.:
                 <ul>
                     <li><code>msg.bucket = "test-bucket"</code></li>
+                    <li><code>msg.maxkeys = 1000</code></li>
+                    <li><code>msg.marker = "example.json"</code></li>
+                    <li><code>msg.prefix = "exmp"</code></li>
                 </ul>
             </li>
         </ul>
@@ -117,8 +132,11 @@
 
 <script type="text/x-red" data-help-name="List Objects">
     <p>S3 list objects node. This node is used to list all objects that
-    are within a bucket. The bucket can be specified either directly 
-    on this node properties or by setting input property <code>msg.bucket</code></p>
+    are within a bucket. The bucket can be specified either directly
+    on this node properties or by setting input property <code>msg.bucket</code>.
+    Other parameters can be set, such as <code>Max Keys</code>, <code>Marker</code> and <code>Prefix</code>.
+    These parameters can be also set by setting properites of the input message respectively 
+    <code>maxkeys</code>, <code>marker</code> and <code>prefix</code>.</p>
 </script>
 
 <script type="text/javascript">
@@ -128,13 +146,16 @@
         defaults: {
             name: {value: ""},
             conf: {type:"client-s3", required:true},
-            bucket: {type: 'text', required: false}
+            bucket: {type: 'text', required: false},
+            maxkeys: {type: 'num', required: false},
+            marker: {type: 'text', required: false},
+            prefix: {type: 'text', required: false}
         },
         inputs: 1,
         outputs: 1,
         icon: "s3Logo.png",
         // icon: "font-awesome/fa-automobile",
-        label: function() { 
+        label: function() {
             return this.name ? this.name : "List Objects";
         }
     });
@@ -152,11 +173,11 @@
         <input type="text" id="node-input-conf">
     </div>
     <div class="form-row">
-        <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <label for="node-input-bucket"><i class="fa fa-database"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
         <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
     </div>
     <div class="form-row">
-        <label for="node-input-key"><i class="fa fa-file"></i> <span data-i18n="Key">&nbsp;</span>Key: </label>
+        <label for="node-input-key"><i class="fa fa-magic"></i> <span data-i18n="Key">&nbsp;</span>Key: </label>
         <input type="text" id="node-input-key" data-i18n="[placeholder]Object Key">
     </div>
     <div class="form-tips">
@@ -195,7 +216,7 @@
         outputs: 1,
         icon: "s3Logo.png",
         // icon: "font-awesome/fa-automobile",
-        label: function() { 
+        label: function() {
             return this.name ? this.name : "Get Object";
         }
     });
@@ -213,23 +234,23 @@
         <input type="text" id="node-input-conf">
     </div>
     <div class="form-row">
-        <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <label for="node-input-bucket"><i class="fa fa-database"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
         <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
     </div>
     <div class="form-row">
-        <label for="node-input-key"><i class="fa fa-file"></i> <span data-i18n="Key">&nbsp;</span>Key: </label>
+        <label for="node-input-key"><i class="fa fa-magic"></i> <span data-i18n="Key">&nbsp;</span>Key: </label>
         <input type="text" id="node-input-key" data-i18n="[placeholder]Object Key">
     </div>
     <div class="form-row">
-        <label for="node-input-contentType"><i class="fa fa-eye"></i> <span data-i18n="Content-Type">&nbsp;</span>Content-Type: </label>
+        <label for="node-input-contentType"><i class="fa fa-code"></i> <span data-i18n="Content-Type">&nbsp;</span>Content-Type: </label>
         <input type="text" id="node-input-contentType" data-i18n="[placeholder]Content-Type">
     </div>
     <div class="form-row">
-        <label for="node-input-body"><i class="fa fa-space-shuttle"></i> <span data-i18n="Body">&nbsp;</span>Body: </label>
+        <label for="node-input-body"><i class="fa fa-pencil-square-o"></i> <span data-i18n="Body">&nbsp;</span>Body: </label>
         <input type="text" id="node-input-body" data-i18n="[placeholder]{String}">
     </div>
     <div class="form-row">
-        <label for="node-input-metaData"><i class="fa fa-comment-o"></i> <span data-i18n="Metadata">&nbsp;</span>Metadata: </label>
+        <label for="node-input-metaData"><i class="fa fa-info-circle"></i> <span data-i18n="Metadata">&nbsp;</span>Metadata: </label>
         <input type="text" id="node-input-metaData" data-i18n="[placeholder]{JSON}">
     </div>
     <div class="form-row">
@@ -288,7 +309,7 @@
         outputs: 1,
         icon: "s3Logo.png",
         // icon: "font-awesome/fa-automobile",
-        label: function() { 
+        label: function() {
             return this.name ? this.name : "Put Object";
         }
     });
@@ -306,7 +327,7 @@
         <input type="text" id="node-input-conf">
     </div>
     <div class="form-row">
-        <label for="node-input-objects"><i class="fa fa-file"></i> <span data-i18n="Objects">&nbsp;</span>Objects: </label>
+        <label for="node-input-objects"><i class="fa fa-pencil-square-o"></i> <span data-i18n="Objects">&nbsp;</span>Objects: </label>
         <input type="text" id="node-input-objects" data-i18n="[placeholder][{JSON}, {JSON}, ...]">
     </div>
     <div class="form-row">
@@ -350,7 +371,7 @@
         outputs: 1,
         icon: "s3Logo.png",
         // icon: "font-awesome/fa-automobile",
-        label: function() { 
+        label: function() {
             return this.name ? this.name : "Put Objects";
         }
     });
@@ -368,11 +389,11 @@
         <input type="text" id="node-input-conf">
     </div>
     <div class="form-row">
-        <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <label for="node-input-bucket"><i class="fa fa-database"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
         <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
     </div>
     <div class="form-row">
-        <label for="node-input-key"><i class="fa fa-file"></i> <span data-i18n="Key">&nbsp;</span>Key: </label>
+        <label for="node-input-key"><i class="fa fa-magic"></i> <span data-i18n="Key">&nbsp;</span>Key: </label>
         <input type="text" id="node-input-key" data-i18n="[placeholder]Object Key">
     </div>
     <div class="form-tips">
@@ -409,7 +430,7 @@
         outputs: 1,
         icon: "s3Logo.png",
         // icon: "font-awesome/fa-automobile",
-        label: function() { 
+        label: function() {
             return this.name ? this.name : "Delete Object";
         }
     });
@@ -427,7 +448,7 @@
         <input type="text" id="node-input-conf">
     </div>
     <div class="form-row">
-        <label for="node-input-bucket"><i class="fa fa-folder"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <label for="node-input-bucket"><i class="fa fa-database"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
         <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
     </div>
     <div class="form-tips">
@@ -462,7 +483,7 @@
         outputs: 1,
         icon: "s3Logo.png",
         // icon: "font-awesome/fa-automobile",
-        label: function() { 
+        label: function() {
             return this.name ? this.name : "Create Bucket";
         }
     });

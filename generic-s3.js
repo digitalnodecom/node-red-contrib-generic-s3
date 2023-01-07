@@ -44,7 +44,7 @@ module.exports = function(RED) {
             stream.push(null);
             return stream;
         } catch (err) {
-           return `Error: ${err}`;
+            return `Error: ${err}`;
         }
     }
 
@@ -156,7 +156,7 @@ module.exports = function(RED) {
                         s3Client.destroy();
                         done();
                     }
-    
+
                     node.status({fill:"green",shape:"dot",text:"Success"});
                     setTimeout(() => {
                         node.status({});
@@ -169,7 +169,7 @@ module.exports = function(RED) {
                 // Cleanup
                 if(s3Client !== null) s3Client.destroy();
                 if(done) done();
-                
+
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
                     node.status({});
@@ -177,7 +177,7 @@ module.exports = function(RED) {
             }
         });
     }
-    
+
     RED.nodes.registerType("List Buckets", S3ListBuckets);
 
     // List items from single bucket
@@ -186,7 +186,7 @@ module.exports = function(RED) {
         this.conf = RED.nodes.getNode(n.conf); // Getting configuration
         var node = this; // Referencing the current node
         var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-        
+
 
         if (!config) {
             node.warn(RED._("Missing S3 Client Configuration!"));
@@ -194,14 +194,58 @@ module.exports = function(RED) {
         }
 
         this.on('input', async function(msg, send, done) {
-            let bucket = n.bucket != "" ? n.bucket : null;
 
+            /**
+             * Create a payloadConfig object containing parameters to be sent to S3 API
+             * https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html#API_ListObjectsV2_RequestSyntax
+             */
+            let payloadConfig = {};
+
+            // Bucket parameter
+            let bucket = n.bucket != "" ? n.bucket : null;
             if(!bucket) {
                 bucket = msg.bucket ? msg.bucket : null;
                 if(!bucket) {
                     node.error('No bucket provided!');
                     return;
                 }
+            }
+            payloadConfig.Bucket = bucket;
+
+            // max-keys parameter
+            let maxkeys = n.maxkeys != "" ? Number(n.maxkeys) : null;
+            if(!maxkeys) {
+                maxkeys = msg.maxkeys ? msg.maxkeys : null;
+            }
+            if(maxkeys) {
+                if(!Number.isInteger(maxkeys)) {
+                    node.error('The maxkeys should be of type Integer!');
+                    return;
+                } else {
+                    if(maxkeys <= 0) {
+                        node.error('The maxkeys properties should be positive number!');
+                        return;
+                    }
+                    payloadConfig.MaxKeys = maxkeys;
+                }
+            }
+
+            // marker parameter
+            let marker = n.marker != "" ? n.marker : null;
+            if(!marker) {
+                marker = msg.marker ? msg.marker : null;
+            }
+            if(marker) {
+                payloadConfig.Marker = marker
+            }
+
+            // prefix parameter
+            let prefix = n.prefix != "" ? n.prefix : null;
+            if(!prefix) {
+                prefix = msg.prefix ? msg.prefix : null;
+            }
+            if(prefix) {
+                payloadConfig.Prefix = prefix
             }
 
             // S3 client init
@@ -219,7 +263,7 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // List all objects from the desired bucket
-                s3Client.listObjects({ Bucket: bucket }, function(err, data) {
+                s3Client.listObjects(payloadConfig, function(err, data) {
                     if(err) {
                         node.status({fill:"red",shape:"dot",text:`Failure`});
                         node.error(err);
@@ -230,13 +274,13 @@ module.exports = function(RED) {
                             payload: data,
                             bucket: bucket
                         });
-        
+
                         // Finalize
                         if(done) {
                             s3Client.destroy();
                             done();
                         }
-        
+
                         node.status({fill:"green",shape:"dot",text:"Success"});
                         setTimeout(() => {
                             node.status({});
@@ -279,7 +323,7 @@ module.exports = function(RED) {
 
             let bucket = n.bucket != "" ? n.bucket : null;
             let key = n.key != "" ? n.key : null;
-            
+
             // Checking for correct properties input
             if(!bucket) {
                 bucket = msg.bucket ? msg.bucket : null;
@@ -319,20 +363,20 @@ module.exports = function(RED) {
                         node.error(err);
                         send({payload: null, key: key});
                     } else { // if not, return message with the payload
-        
+
                         send({
                             payload: data,
                             key: key
                         });
                         node.status({fill:"green",shape:"dot",text:"Success"});
                     }
-    
+
                     // Finalize
                     if(done) {
                         s3Client.destroy();
                         done();
                     }
-    
+
                     setTimeout(() => {
                         node.status({});
                     }, 2000);
@@ -396,7 +440,7 @@ module.exports = function(RED) {
                     return;
                 }
             }
-            
+
             if(!body) {
                 body = msg.body ? msg.body : null;
                 if(!body) {
@@ -433,7 +477,7 @@ module.exports = function(RED) {
                 if(!isObject(metadata)) {
                     metadata = JSON.parse(metadata);
                 }
-                
+
             }
 
             if(!upsert) {
@@ -463,14 +507,14 @@ module.exports = function(RED) {
                     if(done) {
                         s3Client.destroy();
                         done();
-                    } 
+                    }
                     return;
                 }
 
                 if(upsert) {
                     // Calculating MD5 od the body
                     const MD5 = crypto.createHash('md5').update(body).digest("hex");
-    
+
                     // Fetching HeadData (Metadata) for the object that is being upserted or inserted
                     try{
                         s3Client.headObject({ Bucket: bucket, Key: key }, function(err, data) {
@@ -482,9 +526,9 @@ module.exports = function(RED) {
                                     ContentType: contentType,
                                     Body: streamifiedBody
                                 };
-                                
+
                                 if(metadata) objectToCreate.Metadata = metadata;
-                
+
                                 // Uploading
                                 node.status({fill:"blue",shape:"dot",text:"Uploading"});
                                 s3Client.putObject(objectToCreate, function(error, data) {
@@ -497,10 +541,10 @@ module.exports = function(RED) {
                                         send({
                                             payload: data,
                                             key: key
-                                        }); 
+                                        });
                                         node.status({fill:"green",shape:"dot",text:`Success`});
                                     }
-                
+
                                     // Finalize
                                     if(done) {
                                         s3Client.destroy();
@@ -527,9 +571,9 @@ module.exports = function(RED) {
                                         ContentType: contentType,
                                         Body: streamifiedBody
                                     };
-                                    
+
                                     if(metadata) objectToCreate.Metadata = metadata;
-                    
+
                                     // Uploading
                                     node.status({fill:"blue",shape:"dot",text:"Uploading"});
                                     s3Client.putObject(objectToCreate, function(error, data) {
@@ -542,10 +586,10 @@ module.exports = function(RED) {
                                             send({
                                                 payload: data,
                                                 key: key
-                                            }); 
+                                            });
                                             node.status({fill:"green",shape:"dot",text:`Success`});
                                         }
-                    
+
                                         // Finalize
                                         if(done) {
                                             s3Client.destroy();
@@ -561,12 +605,12 @@ module.exports = function(RED) {
                         });
 
                     } catch (err) {
-                         // If error occurs
+                        // If error occurs
                         node.error(err);
                         // Cleanup
                         if(s3Client !== null) s3Client.destroy();
                         if(done) done();
-                        
+
                         node.status({fill:"red",shape:"dot",text:"Failure"});
                         setTimeout(() => {
                             node.status({});
@@ -580,9 +624,9 @@ module.exports = function(RED) {
                         ContentType: contentType,
                         Body: streamifiedBody
                     };
-                    
+
                     if(metadata) objectToCreate.Metadata = metadata;
-    
+
                     // Uploading
                     node.status({fill:"blue",shape:"dot",text:"Uploading"});
                     s3Client.putObject(objectToCreate, function(error, data) {
@@ -595,10 +639,10 @@ module.exports = function(RED) {
                             send({
                                 payload: data,
                                 key: key
-                            }); 
+                            });
                             node.status({fill:"green",shape:"dot",text:`Success`});
                         }
-    
+
                         // Finalize
                         if(done) {
                             s3Client.destroy();
@@ -617,7 +661,7 @@ module.exports = function(RED) {
                 // Cleanup
                 if(s3Client !== null) s3Client.destroy();
                 if(done) done();
-                
+
                 node.status({fill:"red",shape:"dot",text:"Failure"});
                 setTimeout(() => {
                     node.status({});
@@ -642,14 +686,14 @@ module.exports = function(RED) {
         }
 
         this.on('input', async function(msg, send, done) {
-            
+
             let objects = n.objects != "" ? n.objects : null; // Bucket info
             let upsert = n.upsert ? n.upsert : false; // Upsert flag
 
             // Checking for correct properties input
             if(!objects) {
                 objects = msg.objects ? msg.objects : null;
-                
+
                 if(!isJsonString(objects)) {
                     if(!Array.isArray(objects)) {
                         node.error('Invalid objects input format!');
@@ -702,15 +746,15 @@ module.exports = function(RED) {
                                 Bucket: inputObjects[i].bucket,
                                 Key: inputObjects[i].key
                             });
-                            
+
                             let ETag = objectMeta.ETag.substring(1, objectMeta.ETag.length - 1); // Formatting the ETag
-                            const MD5 = crypto.createHash('md5').update(inputObjects[i].body).digest("hex");     
-    
+                            const MD5 = crypto.createHash('md5').update(inputObjects[i].body).digest("hex");
+
                             // Checking if the existing object data is exactly the same as the request message
                             if(ETag != MD5) {
                                 objectsToPut.push(inputObjects[i]);
                             }
-    
+
                         } catch (e) {
                             objectsToPut.push(inputObjects[i]);
                         }
@@ -726,7 +770,7 @@ module.exports = function(RED) {
                     send({payload: null});
                     node.warn('All of the objects are exactly the same as the already existing ones in the specified bucket!');
                     node.status({fill:"yellow",shape:"dot",text:"No objects uploaded!"});
-                    
+
                     // Cleanup
                     if(done) {
                         s3Client.destroy();
@@ -739,7 +783,7 @@ module.exports = function(RED) {
 
                     return;
                 }
-                
+
                 // Uploading
                 node.status({fill:"blue",shape:"dot",text:"Uploading"});
                 let responses = [];
@@ -854,7 +898,7 @@ module.exports = function(RED) {
                         s3Client.destroy();
                         done();
                     }
-    
+
                     setTimeout(() => {
                         node.status({});
                     }, 3000);
@@ -938,7 +982,7 @@ module.exports = function(RED) {
                         s3Client.destroy();
                         done();
                     }
-    
+
                     setTimeout(() => {
                         node.status({});
                     }, 3000);
