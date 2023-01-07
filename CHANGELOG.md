@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
-Updated List Object node with additional properties such as: MaxKeys, Marker and Prefix
+Updated List Objects node with additional properties such as: MaxKeys, Marker and Prefix
 Approprietly updated the documentation
 ## 1.3.1 - 2023-01-06
 Added optional upsert for Put Object
