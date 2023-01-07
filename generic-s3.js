@@ -222,7 +222,7 @@ module.exports = function(RED) {
                     node.error('The maxkeys should be of type Integer!');
                     return;
                 } else {
-                    if(maxkeys < 0) {
+                    if(maxkeys <= 0) {
                         node.error('The maxkeys properties should be positive number!');
                         return;
                     }
@@ -263,7 +263,7 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
                 // List all objects from the desired bucket
-                s3Client.listObjectsV2(payloadConfig, function(err, data) {
+                s3Client.listObjects(payloadConfig, function(err, data) {
                     if(err) {
                         node.status({fill:"red",shape:"dot",text:`Failure`});
                         node.error(err);
