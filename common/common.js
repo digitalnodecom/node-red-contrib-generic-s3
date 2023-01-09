@@ -1,3 +1,5 @@
+const { Readable } = require('stream');
+
 // Check if value is JSON string
 const isJsonString = (str) => {
     try {
