@@ -1,0 +1,35 @@
+
+<!-- BEGIN LIST BUCKETS -->
+<script type="text/x-red" data-template-name="List Buckets">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="name">&nbsp;</span>Name: </label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-conf"><i class="fa fa-cogs"></i> <span data-i18n="Configuration">&nbsp;</span>Client: </label>
+        <input type="text" id="node-input-conf">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="List Buckets">
+    <p>S3 list buckets node. This node is used for listing all buckets
+    that are available with the configured client</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('List Buckets',{
+        category: 'storage-input',
+        color:"#ffffff",
+        defaults: {
+            conf: {type:"client-s3", required:true},
+            name: {value: ""}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "s3Logo.png",
+        label: function() {
+            return this.name ? this.name : "List Buckets";
+        }
+    });
+</script>
+<!-- END LIST BUCKETS -->
