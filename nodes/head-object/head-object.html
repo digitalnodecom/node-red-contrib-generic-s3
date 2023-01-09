@@ -1,0 +1,66 @@
+
+<!-- BEGIN HEAD OBJECT -->
+<script type="text/x-red" data-template-name="Head Object">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="Name">&nbsp;</span>Name: </label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-conf"><code><i class="fa fa-cogs"></i></code> <span data-i18n="Configuration">&nbsp;</span>Client: </label>
+        <input type="text" id="node-input-conf">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bucket"><code><i class="fa fa-database"></i></code> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
+    </div>
+    <div class="form-row">
+        <label for="node-input-key"><code><i class="fa fa-magic"></i></code> <span data-i18n="Key">&nbsp;</span>Key: </label>
+        <input type="text" id="node-input-key" data-i18n="[placeholder]example.json">
+    </div>
+    <div class="form-row">
+        <label for="node-input-versionid"><i class="fa fa-history"></i> <span data-i18n="Version ID">&nbsp;</span>Version ID: </label>
+        <input type="text" id="node-input-versionid" data-i18n="[placeholder]t46ZenlYTZBnj">
+    </div>
+    <div class="form-tips">
+        <span>Tips:</span>
+        <ul>
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code>, <code>Key</code> and(or) <code>Version ID</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+                <ul>
+                    <li><code>msg.bucket = "test-bucket"</code></li> 
+                    <li><code>msg.key = "example.json"</code></li>
+                    <li><code>msg.versionid = "t46ZenlYTZBnj"</code></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Head Object">
+    <p>S3 head object node. This node is used to get object metadata
+    from the specified bucket using the configured client while not fetching the object itself. 
+    The bucket name and the object key can be specified in the properties of the node or 
+    by setting input properties <code>msg.bucket</code> 
+    and(or) <code>msg.key</code> respectively. Version ID is optional and it can be set 
+    from the node or by setting the input property <code>msg.version</code></p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('Head Object',{
+        category: 'storage-input',
+        color:"#FFFFFF",
+        defaults: {
+            name: {value: ""},
+            conf: {type:"client-s3", required:true},
+            bucket: {type: 'text', required: false},
+            key: {type: 'text', required: false},
+            versionid: {type: 'text', required: false},
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "s3Logo.png",
+        label: function() {
+            return this.name ? this.name : "Head Object";
+        }
+    });
+</script>
+<!-- END HEAD OBJECT -->
