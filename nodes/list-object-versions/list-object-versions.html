@@ -1,6 +1,6 @@
 
-<!-- BEGIN LIST OBJECTS -->
-<script type="text/x-red" data-template-name="List Objects">
+<!-- BEGIN LIST OBJECT VERSIONS -->
+<script type="text/x-red" data-template-name="List Object Versions">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="Name">&nbsp;</span>Name: </label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]Name">
@@ -18,8 +18,12 @@
         <input type="number" id="node-input-maxkeys" data-i18n="[placeholder]1000">
     </div>
     <div class="form-row">
-        <label for="node-input-marker"><i class="fa fa-map-pin"></i> <span data-i18n="Marker">&nbsp;</span>Marker: </label>
-        <input type="text" id="node-input-marker" data-i18n="[placeholder]example-file.json">
+        <label for="node-input-keymarker"><i class="fa fa-map-pin"></i> <span data-i18n="Key Marker">&nbsp;</span>Key Marker: </label>
+        <input type="text" id="node-input-keymarker" data-i18n="[placeholder]example-file.json">
+    </div>
+    <div class="form-row">
+        <label for="node-input-versionidmarker"><i class="fa fa-history"></i> <span data-i18n="Version ID Marker">&nbsp;</span>Version ID Marker: </label>
+        <input type="text" id="node-input-versionidmarker" data-i18n="[placeholder]t46ZenlYTZBnj">
     </div>
     <div class="form-row">
         <label for="node-input-prefix"><i class="fa fa-indent"></i> <span data-i18n="Prefix">&nbsp;</span>Prefix: </label>
@@ -28,11 +32,12 @@
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
-            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> field blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+            <li><span data-i18n="[html]tip1">Leave the above field blank if you are setting them via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
                 <ul>
                     <li><code>msg.bucket = "test-bucket"</code></li>
                     <li><code>msg.maxkeys = 1000</code></li>
-                    <li><code>msg.marker = "example.json"</code></li>
+                    <li><code>msg.keymarker = "example.json"</code></li>
+                    <li><code>msg.versionidmarker = "t46ZenlYTZBnj"</code></li>
                     <li><code>msg.prefix = "exmp"</code></li>
                 </ul>
             </li>
@@ -40,17 +45,17 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="List Objects">
-    <p>S3 list objects node. This node is used to list all objects that
+<script type="text/x-red" data-help-name="List Object Versions">
+    <p>S3 list object versions node. This node is used to list all objects versions that
     are within a bucket. The bucket can be specified either directly
     on this node properties or by setting input property <code>msg.bucket</code>.
-    Other parameters can be set, such as <code>Max Keys</code>, <code>Marker</code> and <code>Prefix</code>.
+    Other parameters can be set, such as <code>Max Keys</code>, <code>Key Marker</code>, <code>Version ID Marker</code> and <code>Prefix</code>.
     These parameters can be also set by setting properites of the input message respectively 
-    <code>maxkeys</code>, <code>marker</code> and <code>prefix</code>.</p>
+    <code>maxkeys</code>, <code>startafter</code>, <code>versionidmarker</code> and <code>prefix</code>.</p>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('List Objects',{
+    RED.nodes.registerType('List Object Versions',{
         category: 'storage-input',
         color:"#FFFFFF",
         defaults: {
@@ -58,15 +63,16 @@
             conf: {type:"client-s3", required:true},
             bucket: {type: 'text', required: false},
             maxkeys: {type: 'num', required: false},
-            marker: {type: 'text', required: false},
+            keymarker: {type: 'text', required: false},
+            versionidmarker: {type: 'text', required: false},
             prefix: {type: 'text', required: false}
         },
         inputs: 1,
         outputs: 1,
         icon: "s3Logo.png",
         label: function() {
-            return this.name ? this.name : "List Objects";
+            return this.name ? this.name : "List Object Versions";
         }
     });
 </script>
-<!-- END LIST OBJECTS -->
+<!-- BEGIN LIST OBJECT VERSIONS -->

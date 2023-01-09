@@ -10,6 +10,7 @@
       "create-bucket": "./nodes/create-bucket/create-bucket.js",
       "list-objects": "./nodes/list-objects/list-objects.js",
       "list-objects-v2": "./nodes/list-objects-v2/list-objects-v2.js",
+      "list-object-versions": "./nodes/list-object-versions/list-object-versions.js",
       "get-object": "./nodes/get-object/get-object.js",
       "put-object": "./nodes/put-object/put-object.js",
       "put-objects": "./nodes/put-objects/put-objects.js",
