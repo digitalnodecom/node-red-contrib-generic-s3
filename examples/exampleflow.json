@@ -45,8 +45,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 750,
-        "y": 340,
+        "x": 810,
+        "y": 360,
         "wires": []
     },
     {
@@ -55,7 +55,7 @@
         "z": "68c732176a3f581e",
         "conf": "",
         "name": "",
-        "x": 490,
+        "x": 530,
         "y": 200,
         "wires": [
             [
@@ -73,7 +73,7 @@
         "maxkeys": "",
         "marker": "",
         "prefix": "",
-        "x": 490,
+        "x": 530,
         "y": 240,
         "wires": [
             [
@@ -114,8 +114,8 @@
         "conf": "",
         "bucket": "",
         "key": "",
-        "x": 490,
-        "y": 320,
+        "x": 530,
+        "y": 360,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -140,7 +140,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 320,
+        "y": 360,
         "wires": [
             [
                 "a726810b2e772ea1"
@@ -158,8 +158,8 @@
         "contentType": "",
         "body": "",
         "upsert": false,
-        "x": 490,
-        "y": 400,
+        "x": 530,
+        "y": 440,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -184,7 +184,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 400,
+        "y": 440,
         "wires": [
             [
                 "71615eb95df1b24a"
@@ -203,7 +203,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 400,
+        "y": 440,
         "wires": [
             [
                 "5b4a9f0be67ae483"
@@ -218,8 +218,8 @@
         "conf": "",
         "bucket": "",
         "key": "",
-        "x": 480,
-        "y": 480,
+        "x": 520,
+        "y": 520,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -244,7 +244,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 480,
+        "y": 520,
         "wires": [
             [
                 "0eeb127a520e4e52"
@@ -263,7 +263,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 480,
+        "y": 520,
         "wires": [
             [
                 "143c257ec47c59f6"
@@ -277,8 +277,8 @@
         "name": "",
         "conf": "",
         "bucket": "",
-        "x": 480,
-        "y": 360,
+        "x": 520,
+        "y": 400,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -303,7 +303,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 360,
+        "y": 400,
         "wires": [
             [
                 "bd77c3bdc0d44f19"
@@ -341,7 +341,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 320,
+        "y": 360,
         "wires": [
             [
                 "671ef02142041653"
@@ -360,7 +360,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 360,
+        "y": 400,
         "wires": [
             [
                 "aa8df3263eb9b4bc"
@@ -395,7 +395,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 440,
+        "y": 480,
         "wires": [
             [
                 "ce7ea9412e44e5d0"
@@ -414,7 +414,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 440,
+        "y": 480,
         "wires": [
             [
                 "652b388bb2f2e393"
@@ -429,8 +429,8 @@
         "conf": "",
         "objects": "",
         "upsert": false,
-        "x": 490,
-        "y": 440,
+        "x": 530,
+        "y": 480,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -447,7 +447,7 @@
         "maxkeys": "",
         "startafter": "",
         "prefix": "",
-        "x": 480,
+        "x": 520,
         "y": 280,
         "wires": [
             [
@@ -496,6 +496,63 @@
         "wires": [
             [
                 "aa9f7aa127edd3e1"
+            ]
+        ]
+    },
+    {
+        "id": "793dbb55a559ac55",
+        "type": "inject",
+        "z": "68c732176a3f581e",
+        "name": "inject",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 320,
+        "wires": [
+            [
+                "32117dc38e7426a6"
+            ]
+        ]
+    },
+    {
+        "id": "32117dc38e7426a6",
+        "type": "function",
+        "z": "68c732176a3f581e",
+        "name": "Parameters",
+        "func": "// Name of the bucket from which you want to list the object(s) versions\nmsg.bucket = 'test-node-bucket';\n// Maximum amount of keys (unsigned integer) that the request will list\nmsg.maxkeys = 200;\n// Marker from which object(s) versions should the listing begin\nmsg.keymarker = \"example.json\";\n// Version from which object(s) versions should the listing begin\nmsg.versionidmarker = \"t46ZenlYTZBnj\";\n// Prefix to list object(s) versions that contain the specified prefix\nmsg.prefix = \"exmp\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 320,
+        "wires": [
+            [
+                "592fe00aaba80034"
+            ]
+        ]
+    },
+    {
+        "id": "592fe00aaba80034",
+        "type": "List Object Versions",
+        "z": "68c732176a3f581e",
+        "name": "",
+        "x": 500,
+        "y": 320,
+        "wires": [
+            [
+                "7dfb6197f997a6e1"
             ]
         ]
     }
