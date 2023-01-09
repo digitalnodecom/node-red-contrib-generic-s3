@@ -12,6 +12,7 @@
       "list-objects-v2": "./nodes/list-objects-v2/list-objects-v2.js",
       "list-object-versions": "./nodes/list-object-versions/list-object-versions.js",
       "get-object": "./nodes/get-object/get-object.js",
+      "head-object": "./nodes/head-object/head-object.js",
       "put-object": "./nodes/put-object/put-object.js",
       "put-objects": "./nodes/put-objects/put-objects.js",
       "delete-object": "./nodes/delete-object/delete-object.js"
