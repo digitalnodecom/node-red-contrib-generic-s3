@@ -1,0 +1,61 @@
+
+<!-- BEGIN PUT OBJECTS -->
+<script type="text/x-red" data-template-name="Put Objects">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="Name">&nbsp;</span>Name: </label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-conf"><i class="fa fa-cogs"></i> <span data-i18n="Configuration">&nbsp;</span>Client: </label>
+        <input type="text" id="node-input-conf">
+    </div>
+    <div class="form-row">
+        <label for="node-input-objects"><i class="fa fa-pencil-square-o"></i> <span data-i18n="Objects">&nbsp;</span>Objects: </label>
+        <input type="text" id="node-input-objects" data-i18n="[placeholder][{JSON}, {JSON}, ...]">
+    </div>
+    <div class="form-row">
+        <label for="node-input-upsert"><i class="fa fa-superpowers"></i> <span data-i18n="Upsert">&nbsp;</span>Upsert: </label>
+        <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-upsert">
+    </div>
+    <div class="form-tips">
+        <span>Tips:</span>
+        <ul>
+            <li><span data-i18n="[html]tip1">If you are setting Objects using this node, make sure it is in valid, format as specified in the placeholder. The objects field needs to be an array of objects. Leave <code>Objects</code> field blank if you are setting it via msg property. E.g.:
+                <ul>
+                    <li><code>msg.objects = [{</br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; key: "unique-object-key.json", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bucket: "test-bucket", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; body: "some data", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; contentType: "application/json", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; metadata(optional): { version: '123' } </br> &nbsp;&nbsp;&nbsp;}]</code></li> 
+                    <li><code>msg.upsert = true</code></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Put Objects">
+    <p>S3 put object node. This node is used to create or update objects
+    and(or) objects' metadata with a specific key within a specified bucket.
+    <code>Objects</code> - The objects |
+    <code>Upsert</code> - (Optional) Specifies wether the objects should be upserted or not<br>
+    These values can be specified in the node properites or by setting input properties like the following
+    <code>msg.objects</code> - The objects |
+    <code>msg.metadata</code> - (Optional) Specifies wether the objects should be upserted or not</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('Put Objects',{
+        category: 'storage-input',
+        color:"#FFFFFF",
+        defaults: {
+            name: {value: ""},
+            conf: {type:"client-s3", required:true},
+            objects: {type: 'text', required: false},
+            upsert: {required: false}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "s3Logo.png",
+        label: function() {
+            return this.name ? this.name : "Put Objects";
+        }
+    });
+</script>
+<!-- END PUT OBJECTS -->

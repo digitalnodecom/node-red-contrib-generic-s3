@@ -5,7 +5,14 @@
   "node-red": {
     "version": ">=3.0.0",
     "nodes": {
-      "Generic S3": "generic-s3.js"
+      "config-s3": "./nodes/config-s3/config-s3.js",
+      "list-buckets": "./nodes/list-buckets/list-buckets.js",
+      "create-bucket": "./nodes/create-bucket/create-bucket.js",
+      "list-objects": "./nodes/list-objects/list-objects.js",
+      "get-object": "./nodes/get-object/get-object.js",
+      "put-object": "./nodes/put-object/put-object.js",
+      "put-objects": "./nodes/put-objects/put-objects.js",
+      "delete-object": "./nodes/delete-object/delete-object.js"
     }
   },
   "repository": {

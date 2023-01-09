@@ -1,0 +1,59 @@
+
+<!-- BEGIN GET OBJECT -->
+<script type="text/x-red" data-template-name="Get Object">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="Name">&nbsp;</span>Name: </label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-conf"><i class="fa fa-cogs"></i> <span data-i18n="Configuration">&nbsp;</span>Client: </label>
+        <input type="text" id="node-input-conf">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bucket"><i class="fa fa-database"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
+    </div>
+    <div class="form-row">
+        <label for="node-input-key"><i class="fa fa-magic"></i> <span data-i18n="Key">&nbsp;</span>Key: </label>
+        <input type="text" id="node-input-key" data-i18n="[placeholder]Object Key">
+    </div>
+    <div class="form-tips">
+        <span>Tips:</span>
+        <ul>
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> and(or) <code>Key</code> field(s) blank if you are setting it via msg property. E.g.:
+                <ul>
+                    <li><code>msg.bucket = "test-bucket"</code></li> 
+                    <li><code>msg.key = "unique-object-key"</code></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Get Object">
+    <p>S3 get object node. This node is used to get object contents and
+    metadata from the specified bucket using the configured client. The bucket
+    name and the object key can be specified in the properties of the node or 
+    by setting input properties <code>msg.bucket</code> 
+    and(or) <code>msg.key</code> respectively</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('Get Object',{
+        category: 'storage-input',
+        color:"#FFFFFF",
+        defaults: {
+            name: {value: ""},
+            conf: {type:"client-s3", required:true},
+            bucket: {type: 'text', required: false},
+            key: {type: 'text', required: false}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "s3Logo.png",
+        label: function() {
+            return this.name ? this.name : "Get Object";
+        }
+    });
+</script>
+<!-- END GET OBJECT -->

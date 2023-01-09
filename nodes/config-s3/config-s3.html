@@ -1,0 +1,54 @@
+<!-- BEGIN CONFIG-S3 -->
+<script type="text/x-red" data-template-name="client-s3">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i><span data-i18n="name">&nbsp;</span>Name:</label>
+        <input class="input-append-left" type="text" id="node-config-input-name" style="width: 70%;" data-i18n="[placeholder]Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-endpoint"><i class="fa fa-code"></i><span data-i18n="endpoint">&nbsp;</span>S3 endpoint:</label>
+        <input class="input-append-left" type="text" id="node-config-input-endpoint" style="width: 70%;" >
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-region"><i class="fa fa-globe"></i><span data-i18n="region">&nbsp;</span>S3 region:</label>
+        <input class="input-append-left" type="text" id="node-config-input-region" style="width: 70%;" >
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-accesskeyid"><i class="fa fa-lock"></i><span data-i18n="accesskeyid">&nbsp;</span>Access Key: </label>
+        <input class="input-append-left" type="text" id="node-config-input-accesskeyid" style="width: 70%;" >
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-secretaccesskey"><i class="fa fa-key"></i><span data-i18n="secretaccesskey">&nbsp;</span>Key secret: </label>
+        <input class="input-append-left" type="password" id="node-config-input-secretaccesskey" style="width: 70%;" >
+    </div>
+    <div class="form-tips">
+        <span>Tips:</span>
+        <ul>
+            <li><span data-i18n="[html]tip1">The <b>endpoint</b> should be an url beggining with <code>http://</code> or <code>https://</code> </span></li>
+            <li>
+                <span data-i18n="[html]tip2"><code>*</code> It is recommended to use environment variables for the <code>Access Key</code> and <code>Key secret</code> fields! Environment variables can be used by inputting the name of the variable in the designated field. The name of the variable is enclosed by parentheses and prefixed by <code>$</code> sign. E.g. <code>$(nameOfTheVar)</code>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/javascript">
+    (function() {
+        RED.nodes.registerType('client-s3',{
+            category: 'config',
+            defaults: {
+                name: {type: 'text', value: ""},
+                endpoint: {type: 'text', required: true, validate: RED.validators.regex(/^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/) },
+                region: {type: 'text', required: true},
+            },
+            credentials: {
+                accesskeyid: {type:"text",required:true},
+                secretaccesskey: {type: "password",required:true},
+            },
+            label: function() {
+                return this.name ? this.name : this.endpoint;
+            },
+            exportable: false,
+        });
+    })();
+</script>
+<!-- END CONFIG-S3 -->

@@ -1,0 +1,52 @@
+
+<!-- BEGIN CREATE BUCKET -->
+<script type="text/x-red" data-template-name="Create Bucket">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="Name">&nbsp;</span>Name: </label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-conf"><i class="fa fa-cogs"></i> <span data-i18n="Configuration">&nbsp;</span>Client: </label>
+        <input type="text" id="node-input-conf">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bucket"><i class="fa fa-database"></i> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
+    </div>
+    <div class="form-tips">
+        <span>Tips:</span>
+        <ul>
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> field blank if you are setting it via msg property. E.g.:
+                <ul>
+                    <li><code>msg.bucket = "test-bucket"</code></li> 
+                </ul>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Create Bucket">
+    <p>S3 create bucket node. This node is used to create bucket with perviously defined
+    S3 client used in the configuration. The bucket name can be specified 
+    either directly on the node properties or by setting input property
+    <code>msg.bucket</code></p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('Create Bucket',{
+        category: 'storage-input',
+        color:"#FFFFFF",
+        defaults: {
+            name: {value: ""},
+            conf: {type:"client-s3", required:true},
+            bucket: {type: 'text', required: false},
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "s3Logo.png",
+        label: function() {
+            return this.name ? this.name : "Create Bucket";
+        }
+    });
+</script>
+<!-- END CREATE BUCKET -->
