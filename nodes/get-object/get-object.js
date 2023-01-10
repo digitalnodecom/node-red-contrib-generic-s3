@@ -18,6 +18,8 @@ module.exports = function(RED) {
 
             let bucket = n.bucket != "" ? n.bucket : null;
             let key = n.key != "" ? n.key : null;
+            
+            let getObjectPayload = {};
 
             // Checking for correct properties input
             if(!bucket) {
@@ -27,6 +29,7 @@ module.exports = function(RED) {
                     return;
                 }
             }
+            getObjectPayload.Bucket = bucket;
 
             if(!key) {
                 key = msg.key ? msg.key : null;
@@ -34,6 +37,16 @@ module.exports = function(RED) {
                     node.error('No object key provided!');
                     return;
                 }
+            }
+            getObjectPayload.Key = key;
+
+            // versionId parameter
+            let versionid = n.versionid != "" ? n.versionid : null;
+            if(!versionid) {
+                versionid = msg.versionid ? msg.versionid : null;
+            }
+            if(versionid) {
+                getObjectPayload.VersionId = versionid;
             }
 
             // S3 client init
@@ -51,7 +64,7 @@ module.exports = function(RED) {
 
                 node.status({fill:"blue",shape:"dot",text:"Fetching"});
 
-                s3Client.getObject({ Bucket: bucket, Key: key }, async function(err, data) {
+                s3Client.getObject(getObjectPayload, async function(err, data) {
                     // If an error occured, print the error
                     if(err) {
                         node.status({fill:"red",shape:"dot",text:`Failure`});
