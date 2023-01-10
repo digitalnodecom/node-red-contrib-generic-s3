@@ -110,10 +110,11 @@
         "id": "671ef02142041653",
         "type": "Get Object",
         "z": "68c732176a3f581e",
-        "name": "Fetch Object",
+        "name": "",
         "conf": "",
         "bucket": "",
         "key": "",
+        "versionid": "",
         "x": 530,
         "y": 360,
         "wires": [
@@ -159,7 +160,7 @@
         "body": "",
         "upsert": false,
         "x": 530,
-        "y": 440,
+        "y": 480,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -184,7 +185,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 440,
+        "y": 480,
         "wires": [
             [
                 "71615eb95df1b24a"
@@ -203,7 +204,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 440,
+        "y": 480,
         "wires": [
             [
                 "5b4a9f0be67ae483"
@@ -219,7 +220,7 @@
         "bucket": "",
         "key": "",
         "x": 520,
-        "y": 520,
+        "y": 560,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -244,7 +245,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 520,
+        "y": 560,
         "wires": [
             [
                 "0eeb127a520e4e52"
@@ -263,7 +264,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 520,
+        "y": 560,
         "wires": [
             [
                 "143c257ec47c59f6"
@@ -278,7 +279,7 @@
         "conf": "",
         "bucket": "",
         "x": 520,
-        "y": 400,
+        "y": 440,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -303,7 +304,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 400,
+        "y": 440,
         "wires": [
             [
                 "bd77c3bdc0d44f19"
@@ -334,7 +335,7 @@
         "type": "function",
         "z": "68c732176a3f581e",
         "name": "Parameters",
-        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n\nreturn msg;",
+        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n// Object's specific version ID\nmsg.versionid = 't46ZenlYTZBnj'\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -360,7 +361,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 400,
+        "y": 440,
         "wires": [
             [
                 "aa8df3263eb9b4bc"
@@ -395,7 +396,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 480,
+        "y": 520,
         "wires": [
             [
                 "ce7ea9412e44e5d0"
@@ -414,7 +415,7 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 480,
+        "y": 520,
         "wires": [
             [
                 "652b388bb2f2e393"
@@ -430,7 +431,7 @@
         "objects": "",
         "upsert": false,
         "x": 530,
-        "y": 480,
+        "y": 520,
         "wires": [
             [
                 "7dfb6197f997a6e1"
@@ -553,6 +554,67 @@
         "wires": [
             [
                 "7dfb6197f997a6e1"
+            ]
+        ]
+    },
+    {
+        "id": "c6d4de2862c919c6",
+        "type": "Head Object",
+        "z": "68c732176a3f581e",
+        "name": "",
+        "conf": "",
+        "bucket": "",
+        "key": "",
+        "versionid": "",
+        "x": 530,
+        "y": 400,
+        "wires": [
+            [
+                "7dfb6197f997a6e1"
+            ]
+        ]
+    },
+    {
+        "id": "2eb2319ddb6518a6",
+        "type": "function",
+        "z": "68c732176a3f581e",
+        "name": "Parameters",
+        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n// Object's specific version ID\nmsg.versionid = 't46ZenlYTZBnj'\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 400,
+        "wires": [
+            [
+                "c6d4de2862c919c6"
+            ]
+        ]
+    },
+    {
+        "id": "f0d76f83f174e6dc",
+        "type": "inject",
+        "z": "68c732176a3f581e",
+        "name": "inject",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 400,
+        "wires": [
+            [
+                "2eb2319ddb6518a6"
             ]
         ]
     }
