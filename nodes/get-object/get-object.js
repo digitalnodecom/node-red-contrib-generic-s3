@@ -1,6 +1,7 @@
 module.exports = function(RED) {
     "use strict";
     const { S3 } = require('@aws-sdk/client-s3');
+    const { streamToString } = require('../../common/common');
 
     // Get Object
     function S3GetObject(n) {
@@ -18,7 +19,7 @@ module.exports = function(RED) {
 
             let bucket = n.bucket != "" ? n.bucket : null;
             let key = n.key != "" ? n.key : null;
-            
+
             let getObjectPayload = {};
 
             // Checking for correct properties input
@@ -49,6 +50,12 @@ module.exports = function(RED) {
                 getObjectPayload.VersionId = versionid;
             }
 
+            // stringifyBody parameter
+            let stringifybody = n.stringifybody ? n.stringifybody : false;
+            if(!stringifybody) {
+                stringifybody = msg.stringifybody ? msg.stringifybody : false;
+            }
+
             // S3 client init
             let s3Client = null;
             try {
@@ -71,6 +78,10 @@ module.exports = function(RED) {
                         node.error(err);
                         send({payload: null, key: key});
                     } else { // if not, return message with the payload
+
+                        if(stringifybody) {
+                            data.BodyAsString = await streamToString(data.Body);
+                        }
 
                         send({
                             payload: data,

@@ -21,14 +21,19 @@
         <label for="node-input-versionid"><i class="fa fa-history"></i> <span data-i18n="Version ID">&nbsp;</span>Version ID: </label>
         <input type="text" id="node-input-versionid" data-i18n="[placeholder]t46ZenlYTZBnj">
     </div>
+    <div class="form-row">
+        <label for="node-input-stringifybody"><i class="fa fa-superpowers"></i> <span data-i18n="Stringify Body">&nbsp;</span>Stringify Body: </label>
+        <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-stringifybody">
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
             <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> and(or) <code>Key</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
                 <ul>
-                    <li><code>msg.bucket = "test-bucket"</code></li> 
+                    <li><code>msg.bucket = "test-bucket"</code></li>
                     <li><code>msg.key = "unique-object-key"</code></li>
                     <li><code>msg.versionid = "t46ZenlYTZBnj"</code></li>
+                    <li><code>msg.stringifybody = true</code></li>
                 </ul>
             </li>
         </ul>
@@ -38,10 +43,10 @@
 <script type="text/x-red" data-help-name="Get Object">
     <p>S3 get object node. This node is used to get object contents and
     metadata from the specified bucket using the configured client. The bucket
-    name and the object key can be specified in the properties of the node or 
-    by setting input properties <code>msg.bucket</code> 
-    and(or) <code>msg.key</code> respectively</p> Version ID is optional and it can be set 
-    from the node or by setting the input property <code>msg.version</code></p>
+    name and the object key can be specified in the properties of the node or
+    by setting input properties <code>msg.bucket</code>
+    and(or) <code>msg.key</code> respectively</p> Version ID and Stringify Body are optional and can be set
+    from the node or by setting input properties <code>msg.version</code>, <code>msg.stringifybody</code></p>
 </script>
 
 <script type="text/javascript">
@@ -54,6 +59,7 @@
             bucket: {type: 'text', required: false},
             key: {type: 'text', required: false},
             versionid: {type: 'text', required: false},
+            stringifybody: {required: false}
         },
         inputs: 1,
         outputs: 1,
