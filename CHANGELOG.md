@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
-
+Added Continuation Token property for List Object V2 node
 ## 1.6.2 - 2023-01-18
 Added Stringify Body flag for Get Object node
 
