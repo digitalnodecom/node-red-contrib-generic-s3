@@ -70,6 +70,15 @@ module.exports = function(RED) {
                 payloadConfig.Prefix = prefix
             }
 
+            // ContinuationToken parameter
+            let continuationtoken = n.continuationtoken != "" ? n.continuationtoken : null;
+            if(!continuationtoken) {
+                continuationtoken = msg.continuationtoken ? msg.continuationtoken : null;
+            }
+            if(continuationtoken) {
+                payloadConfig.ContinuationToken = continuationtoken;
+            }
+
             // S3 client init
             let s3Client = null;
             try {

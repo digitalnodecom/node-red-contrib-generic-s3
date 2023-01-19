@@ -25,6 +25,10 @@
         <label for="node-input-prefix"><i class="fa fa-indent"></i> <span data-i18n="Prefix">&nbsp;</span>Prefix: </label>
         <input type="text" id="node-input-prefix" data-i18n="[placeholder]exmp">
     </div>
+    <div class="form-row">
+        <label for="node-input-continuationtoken"><i class="fa fa-forward"></i> <span data-i18n="Continuation Token">&nbsp;</span>Continuation Token: </label>
+        <input type="text" id="node-input-continuationtoken" data-i18n="[placeholder]Valid continuation token (JWT)">
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
@@ -34,6 +38,7 @@
                     <li><code>msg.maxkeys = 1000</code></li>
                     <li><code>msg.startafter = "example.json"</code></li>
                     <li><code>msg.prefix = "exmp"</code></li>
+                    <li><code>msg.continuationtoken = "Continuation token"</code></li>
                 </ul>
             </li>
         </ul>
@@ -44,9 +49,9 @@
     <p>S3 list objects node V2. This node is used to list all objects that
     are within a bucket using version 2 list object API. The bucket can be specified either directly
     on this node properties or by setting input property <code>msg.bucket</code>.
-    Other parameters can be set, such as <code>Max Keys</code>, <code>Start After</code> and <code>Prefix</code>.
-    These parameters can be also set by setting properites of the input message respectively 
-    <code>maxkeys</code>, <code>startafter</code> and <code>prefix</code>.</p>
+    Other parameters can be set, such as <code>Max Keys</code>, <code>Start After</code>, <code>Prefix</code> and <code>Continuation Token</code>.
+    These parameters can be also set by setting properites of the input message respectively
+    <code>maxkeys</code>, <code>startafter</code>, <code>prefix</code> and <code>continuationtoken</code>.</p>
 </script>
 
 <script type="text/javascript">
@@ -59,7 +64,8 @@
             bucket: {type: 'text', required: false},
             maxkeys: {type: 'num', required: false},
             startafter: {type: 'text', required: false},
-            prefix: {type: 'text', required: false}
+            prefix: {type: 'text', required: false},
+            continuationtoken: {type: 'text', required: false},
         },
         inputs: 1,
         outputs: 1,
