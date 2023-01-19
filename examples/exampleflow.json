@@ -461,7 +461,7 @@
         "type": "function",
         "z": "68c732176a3f581e",
         "name": "Parameters",
-        "func": "// Name of the bucket from which you want to list the objects\nmsg.bucket = 'test-node-bucket';\n// Max keys (unsigned integer) that the request will list\nmsg.maxkeys = 200;\n// Marker from which object should the listing begin\nmsg.startafter = \"example.json\";\n// Prefix to list objects that contain the specified prefix\nmsg.prefix = \"exmp\";\n\nreturn msg;",
+        "func": "// Name of the bucket from which you want to list the objects\nmsg.bucket = 'test-node-bucket';\n// Max keys (unsigned integer) that the request will list\nmsg.maxkeys = 200;\n// Marker from which object should the listing begin\nmsg.startafter = \"example.json\";\n// Prefix to list objects that contain the specified prefix\nmsg.prefix = \"exmp\";\n// Continuation token which indicates where this listing should be continued from\nmsg.continuationtoken = \"eyJuZXh0S2V5TWFya2VyIjogIjI3XzI3MDAuanNvbiIsICJuZXh0UHJlZml4TWFya2VyIjogIiJ9\";\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
