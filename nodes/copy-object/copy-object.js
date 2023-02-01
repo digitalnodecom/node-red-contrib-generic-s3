@@ -54,7 +54,6 @@ module.exports = function(RED) {
                     return;
                 }
             }
-            // copysource = encodeURIComponent(copysource);
 
             // versionId parameter
             let versionid = n.versionid != "" ? n.versionid : null;
@@ -63,14 +62,10 @@ module.exports = function(RED) {
             }
 
             if(versionid) {
-                payloadConfig.CopySource = `${copysource}?versionId=${versionid}`;
-                // payloadConfig.CopySource = encodeURIComponent(`${copysource}?versionId=${versionid}`);
+                payloadConfig.CopySource = encodeURI(`${copysource}?versionId=${encodeURIComponent(versionid)}`);
             } else {
-                payloadConfig.CopySource = encodeURIComponent(copysource);
-                // payloadConfig.CopySource = copysource;
+                payloadConfig.CopySource = encodeURI(copysource);
             }
-
-            node.warn(payloadConfig);
 
             // S3 client init
             let s3Client = null;
