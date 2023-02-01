@@ -28,7 +28,7 @@
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
-            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> field blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code>, <code>Key</code>, <code>Copy Source</code> and(or) <code>Version ID</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
                 <ul>
                     <li><code>msg.bucket = "test-bucket"</code></li>
                     <li><code>msg.key = "destination.json"</code></li>
@@ -41,12 +41,12 @@
 </script>
 
 <script type="text/x-red" data-help-name="Copy Object">
-    <p>S3 list objects node V2. This node is used to list all objects that
-    are within a bucket using version 2 list object API. The bucket can be specified either directly
+    <p>S3 copy object node. This node is used to copy object from a source
+    to specified Bucket with specified Key. The bucket can be specified either directly
     on this node properties or by setting input property <code>msg.bucket</code>.
-    Other parameters can be set, such as <code>Max Keys</code>, <code>Start After</code>, <code>Prefix</code> and <code>Continuation Token</code>.
+    Other parameters should be set as, such as <code>Key</code>, <code>Copy Source</code> and <code>Version Id (optional)</code>.
     These parameters can be also set by setting properites of the input message respectively
-    <code>maxkeys</code>, <code>startafter</code>, <code>prefix</code> and <code>continuationtoken</code>.</p>
+    <code>key</code>, <code>copysource</code> and <code>versionid</code>.</p>
 </script>
 
 <script type="text/javascript">
