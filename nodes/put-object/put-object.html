@@ -30,18 +30,23 @@
         <input type="text" id="node-input-metaData" data-i18n="[placeholder]{JSON}">
     </div>
     <div class="form-row">
+        <label for="node-input-isStream"><i class="fa fa-barcode"></i> <span data-i18n="Upsert">&nbsp;</span>Stream: </label>
+        <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-isStream">
+    </div>
+    <div class="form-row">
         <label for="node-input-upsert"><i class="fa fa-superpowers"></i> <span data-i18n="Upsert">&nbsp;</span>Upsert: </label>
         <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-upsert">
     </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
-            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> | <code>Key</code> | <code>Content-Type</code> | <code>Body</code> | <code>Metadata</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> | <code>Key</code> | <code>Content-Type</code> | <code>Body</code> | <code>Stream</code> | <code>Metadata</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
                 <ul>
-                    <li><code>msg.bucket = "test-bucket"</code></li> 
+                    <li><code>msg.bucket = "test-bucket"</code></li>
                     <li><code>msg.key = "unique-object-key.json"</code></li>
                     <li><code>msg.contentType = "application/json"</code></li>
                     <li><code>msg.body = "some data"</code></li>
+                    <li><code>msg.isStream = false</code></li>
                     <li><code>msg.metaData = { version: '123' }</code></li>
                     <li><code>msg.upsert = true</code></li>
                 </ul>
@@ -54,15 +59,18 @@
     <p>S3 put object node. This node is used to create or update object
     and(or) object's metadata with a specific key within a specified bucket.
     <code>Bucket</code> - The bucket |
-    <code>Key</code> - The object key | 
-    <code>Content-Type</code> - Content-Type of the object's data | 
-    <code>Body</code> - Actual contents of the object | 
+    <code>Key</code> - The object key |
+    <code>Content-Type</code> - Content-Type of the object's data |
+    <code>Body</code> - Actual contents of the object |
+    <code>Stream</code> - (Optional) The provided body is a stream |
     <code>Metadata</code> - (Optional) Metadata of the object<br>
+    <code>Upsert</code> - (Optional) Specifies wether the objects should be upserted or not</p>
     These values can be specified in the node properites or by setting input properties like the following
     <code>msg.bucket</code> - The bucket |
-    <code>msg.key</code> - The object key | 
-    <code>msg.contentType</code> - Content-Type of the object's data | 
-    <code>msg.body</code> - Actual contents of the object | 
+    <code>msg.key</code> - The object key |
+    <code>msg.contentType</code> - Content-Type of the object's data |
+    <code>msg.body</code> - Actual contents of the object |
+    <code>msg.isStream</code> - (Optional) The provided body is a stream |
     <code>msg.metadata</code> - (Optional) Metadata of the object |
     <code>msg.upsert</code> - (Optional) Specifies wether the objects should be upserted or not</p>
 </script>
@@ -78,8 +86,9 @@
             key: {type: 'text', required: false},
             contentType: {type: 'text', required: false},
             body: {type: 'text', required: false},
+            isStream: {required: false},
             metadata: {required: false},
-            upsert: {required: false}
+            upsert: {required: false},
         },
         inputs: 1,
         outputs: 1,
