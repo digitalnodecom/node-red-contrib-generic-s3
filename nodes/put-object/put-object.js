@@ -22,7 +22,7 @@ module.exports = function(RED) {
             let bucket = n.bucket !== "" ? n.bucket : null; // Bucket info
             let key = n.key !== "" ? n.key : null; // Object key
             let body = n.body !== "" ? n.body : null; // Body of the object to upload
-            let isStream = n.isStream ? n.isStream : false; // Upsert flag
+            let stream = n.stream ? n.stream : false; // Upsert flag
             let metadata = n.metadata !== "" ? n.metadata : null; // Metadata of the object
             let contentType = n.contentType !== "" ? n.contentType : null; // Content-Type of the object
             let upsert = n.upsert ? n.upsert : false; // Upsert flag
@@ -53,14 +53,14 @@ module.exports = function(RED) {
                 }
             }
 
-            if(!isStream) {
-                isStream = msg.isStream ? msg.isStream : null;
+            if(!stream) {
+                stream = msg.stream ? msg.stream : null;
             }
 
             // If the body is not a string
             // but neither a stream is expected, the body
             //  should be formatted as string
-            if(!isString(body) && !isStream) {
+            if(!isString(body) && !stream) {
                 node.error('The body should be formatted as string!');
                 return;
             }
@@ -115,7 +115,7 @@ module.exports = function(RED) {
 
                 // Body is stream check,
                 // if it isn't then streamify the body
-                if(!isStream) {
+                if(!stream) {
                     // Converting body from string to stream
                     // since the sdk requires stream for upload
                     bodyToUpload = stringToStream(body);

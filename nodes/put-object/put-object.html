@@ -30,8 +30,8 @@
         <input type="text" id="node-input-metaData" data-i18n="[placeholder]{JSON}">
     </div>
     <div class="form-row">
-        <label for="node-input-isStream"><i class="fa fa-barcode"></i> <span data-i18n="Upsert">&nbsp;</span>Stream: </label>
-        <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-isStream">
+        <label for="node-input-stream"><i class="fa fa-barcode"></i> <span data-i18n="Upsert">&nbsp;</span>Stream: </label>
+        <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-stream">
     </div>
     <div class="form-row">
         <label for="node-input-upsert"><i class="fa fa-superpowers"></i> <span data-i18n="Upsert">&nbsp;</span>Upsert: </label>
@@ -46,7 +46,7 @@
                     <li><code>msg.key = "unique-object-key.json"</code></li>
                     <li><code>msg.contentType = "application/json"</code></li>
                     <li><code>msg.body = "some data"</code></li>
-                    <li><code>msg.isStream = false</code></li>
+                    <li><code>msg.stream = false</code></li>
                     <li><code>msg.metaData = { version: '123' }</code></li>
                     <li><code>msg.upsert = true</code></li>
                 </ul>
@@ -70,7 +70,7 @@
     <code>msg.key</code> - The object key |
     <code>msg.contentType</code> - Content-Type of the object's data |
     <code>msg.body</code> - Actual contents of the object |
-    <code>msg.isStream</code> - (Optional) The provided body is a stream |
+    <code>msg.stream</code> - (Optional) The provided body is a stream |
     <code>msg.metadata</code> - (Optional) Metadata of the object |
     <code>msg.upsert</code> - (Optional) Specifies wether the objects should be upserted or not. <br>
     For streamifying the contents of the body we recommend using <a href="https://github.com/digitalnodecom/node-red-contrib-generic-s3/blob/main/common/common.js#L23-L30">this function</a>
@@ -88,7 +88,7 @@
             key: {type: 'text', required: false},
             contentType: {type: 'text', required: false},
             body: {type: 'text', required: false},
-            isStream: {required: false},
+            stream: {required: false},
             metadata: {required: false},
             upsert: {required: false},
         },
