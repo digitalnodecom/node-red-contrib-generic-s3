@@ -22,9 +22,10 @@ module.exports = function(RED) {
             let bucket = n.bucket !== "" ? n.bucket : null; // Bucket info
             let key = n.key !== "" ? n.key : null; // Object key
             let body = n.body !== "" ? n.body : null; // Body of the object to upload
+            let stream = n.stream ? n.stream : false; // Upsert flag
             let metadata = n.metadata !== "" ? n.metadata : null; // Metadata of the object
             let contentType = n.contentType !== "" ? n.contentType : null; // Content-Type of the object
-            let upsert = n.upsert ? n.upsert : false;
+            let upsert = n.upsert ? n.upsert : false; // Upsert flag
 
 
             // Checking for correct properties input
@@ -52,7 +53,14 @@ module.exports = function(RED) {
                 }
             }
 
-            if(!isString(body)) {
+            if(!stream) {
+                stream = msg.stream ? msg.stream : null;
+            }
+
+            // If the body is not a string
+            // but neither a stream is expected, the body
+            //  should be formatted as string
+            if(!isString(body) && !stream) {
                 node.error('The body should be formatted as string!');
                 return;
             }
@@ -102,16 +110,23 @@ module.exports = function(RED) {
                     }
                 });
 
-                // Converting body from string to stream
-                // since the sdk requires stream for upload
-                const streamifiedBody = stringToStream(body);
-                if(!streamifiedBody) {
-                    node.error('Failed to streamify body. Body needs to be a string!');
-                    if(done) {
-                        s3Client.destroy();
-                        done();
+
+                let bodyToUpload = body;
+
+                // Body is stream check,
+                // if it isn't then streamify the body
+                if(!stream) {
+                    // Converting body from string to stream
+                    // since the sdk requires stream for upload
+                    bodyToUpload = stringToStream(body);
+                    if(!bodyToUpload) {
+                        node.error('Failed to streamify body. Body needs to be a string!');
+                        if(done) {
+                            s3Client.destroy();
+                            done();
+                        }
+                        return;
                     }
-                    return;
                 }
 
                 if(upsert) {
@@ -127,7 +142,7 @@ module.exports = function(RED) {
                                     Bucket: bucket,
                                     Key: key,
                                     ContentType: contentType,
-                                    Body: streamifiedBody
+                                    Body: bodyToUpload
                                 };
 
                                 if(metadata) objectToCreate.Metadata = metadata;
@@ -172,7 +187,7 @@ module.exports = function(RED) {
                                         Bucket: bucket,
                                         Key: key,
                                         ContentType: contentType,
-                                        Body: streamifiedBody
+                                        Body: bodyToUpload
                                     };
 
                                     if(metadata) objectToCreate.Metadata = metadata;
@@ -225,7 +240,7 @@ module.exports = function(RED) {
                         Bucket: bucket,
                         Key: key,
                         ContentType: contentType,
-                        Body: streamifiedBody
+                        Body: bodyToUpload
                     };
 
                     if(metadata) objectToCreate.Metadata = metadata;
