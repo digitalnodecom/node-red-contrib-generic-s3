@@ -72,7 +72,9 @@
     <code>msg.body</code> - Actual contents of the object |
     <code>msg.isStream</code> - (Optional) The provided body is a stream |
     <code>msg.metadata</code> - (Optional) Metadata of the object |
-    <code>msg.upsert</code> - (Optional) Specifies wether the objects should be upserted or not</p>
+    <code>msg.upsert</code> - (Optional) Specifies wether the objects should be upserted or not. <br>
+    For streamifying the contents of the body we recommend using <a href="https://github.com/digitalnodecom/node-red-contrib-generic-s3/blob/main/common/common.js#L23-L30">this function</a>
+    </p>
 </script>
 
 <script type="text/javascript">
