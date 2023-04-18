@@ -26,8 +26,8 @@
         <input type="text" id="node-input-body" data-i18n="[placeholder]{String}">
     </div>
     <div class="form-row">
-        <label for="node-input-metaData"><i class="fa fa-info-circle"></i> <span data-i18n="Metadata">&nbsp;</span>Metadata: </label>
-        <input type="text" id="node-input-metaData" data-i18n="[placeholder]{JSON}">
+        <label for="node-input-metadata"><i class="fa fa-info-circle"></i> <span data-i18n="Metadata">&nbsp;</span>Metadata: </label>
+        <input type="text" id="node-input-metadata" data-i18n="[placeholder]{JSON}">
     </div>
     <div class="form-row">
         <label for="node-input-stream"><i class="fa fa-barcode"></i> <span data-i18n="Upsert">&nbsp;</span>Stream: </label>
@@ -47,7 +47,7 @@
                     <li><code>msg.contentType = "application/json"</code></li>
                     <li><code>msg.body = "some data"</code></li>
                     <li><code>msg.stream = false</code></li>
-                    <li><code>msg.metaData = { version: '123' }</code></li>
+                    <li><code>msg.metadata = { version: '123' }</code></li>
                     <li><code>msg.upsert = true</code></li>
                 </ul>
             </li>
