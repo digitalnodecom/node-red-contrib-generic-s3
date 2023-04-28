@@ -104,7 +104,7 @@ module.exports = function (RED) {
         // Creating S3 client
         s3Client = new S3({
           endpoint: config.endpoint,
-		  forcePathStyle: config.forcePathStyle,
+          forcePathStyle: config.forcepathstyle,
           region: config.region,
           credentials: {
             accessKeyId: config.credentials.accesskeyid,

@@ -6,7 +6,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.endpoint = n.endpoint.trim();
         this.region = n.region.trim();
-        this.forcePathStyle = n.forcePathStyle;
+        this.forcepathstyle = n.forcepathstyle;
     }
 
     RED.nodes.registerType("client-s3",ClientNode, {
@@ -17,7 +17,7 @@ module.exports = function(RED) {
         defaults: {
             endpoint: { type:"text" },
             region: { type:"text" },
-            forcePathStyle: {type:"checkbox"}
+            forcepathstyle: { type:"checkbox" }
         }
     });
 }
