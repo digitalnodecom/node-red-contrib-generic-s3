@@ -110,8 +110,8 @@ module.exports = function (RED) {
                     send(msg);
                   } else {
                     // Replace the payload with
-                    // the returned data
-                    msg.payload = deleteData;
+                    // the returned data from the copyObject response
+                    msg.payload = data;
                     // Append the deleted object
                     // key to the message object
                     msg.key = key;
