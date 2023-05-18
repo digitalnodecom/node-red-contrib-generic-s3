@@ -16,7 +16,8 @@
       "put-object": "./nodes/put-object/put-object.js",
       "put-objects": "./nodes/put-objects/put-objects.js",
       "delete-object": "./nodes/delete-object/delete-object.js",
-      "copy-object": "./nodes/copy-object/copy-object.js"
+      "copy-object": "./nodes/copy-object/copy-object.js",
+      "move-object": "./nodes/move-object/move-object.js"
     }
   },
   "repository": {
