@@ -74,7 +74,7 @@ module.exports = function (RED) {
         node.status({
           fill: "blue",
           shape: "dot",
-          text: "Uploading",
+          text: "Copying...",
         });
 
         s3Client.copyObject(
