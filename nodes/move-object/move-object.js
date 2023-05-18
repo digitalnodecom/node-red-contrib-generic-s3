@@ -96,10 +96,10 @@ module.exports = function (RED) {
             } else {
               s3Client.deleteObject(
                 { Bucket: sourcebucket, Key: sourcekey },
-                function (err, data) {
-                  if (err) {
+                function (deleteErr, deleteData) {
+                  if (deleteErr) {
                     node.status({ fill: "red", shape: "dot", text: `Failure` });
-                    node.error(err);
+                    node.error(deleteErr);
                     // Replace the payload with null
                     msg.payload = null;
                     // Append the delete object
@@ -111,7 +111,7 @@ module.exports = function (RED) {
                   } else {
                     // Replace the payload with
                     // the returned data
-                    msg.payload = data;
+                    msg.payload = deleteData;
                     // Append the deleted object
                     // key to the message object
                     msg.key = key;
