@@ -79,7 +79,7 @@ module.exports = function (RED) {
 
         s3Client.copyObject(
           {
-            CopySource: sourcebucket + "/" + sourcekey,
+            CopySource: encodeURI(sourcebucket + "/" + sourcekey),
             Bucket: bucket,
             Key: key,
           },
