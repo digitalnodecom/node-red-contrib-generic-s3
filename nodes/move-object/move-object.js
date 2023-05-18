@@ -16,11 +16,11 @@ module.exports = function (RED) {
     }
 
     this.on("input", async function (msg, send, done) {
-      let bucket = n.bucket !== "" ? n.bucket : null; // Bucket info
-      let key = n.key !== "" ? n.key : null; // Object key
+      let bucket = n.bucket !== "" ? n.bucket : null; // Destination bucket
+      let key = n.key !== "" ? n.key : null; // Destination object key
 
-      let sourcekey = n.sourcekey !== "" ? n.sourcekey : null;
-      let sourcebucket = n.sourcebucket !== "" ? n.sourcebucket : null;
+      let sourcekey = n.sourcekey !== "" ? n.sourcekey : null; // Source bucket
+      let sourcebucket = n.sourcebucket !== "" ? n.sourcebucket : null; // Source object key
 
       // Checking for correct properties input
       if (!bucket) {
@@ -77,6 +77,9 @@ module.exports = function (RED) {
           text: "Copying...",
         });
 
+        // Object move is actually two step process
+        // 1. The object is copied from the specified source bucket to destination bucket with the specified key
+        // 2. Then the source object is removed from the source bucket
         s3Client.copyObject(
           {
             CopySource: encodeURI(sourcebucket + "/" + sourcekey),
@@ -94,6 +97,8 @@ module.exports = function (RED) {
 
               node.error(err);
             } else {
+              // If the object copying was successful
+              // then proceed to deleting it from the source bucket
               s3Client.deleteObject(
                 { Bucket: sourcebucket, Key: sourcekey },
                 function (deleteErr, deleteData) {
