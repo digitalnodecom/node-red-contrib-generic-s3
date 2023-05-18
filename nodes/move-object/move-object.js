@@ -1,13 +1,6 @@
 module.exports = function (RED) {
   "use strict";
   const { S3 } = require("@aws-sdk/client-s3");
-  const {
-    isString,
-    isJsonString,
-    isObject,
-    stringToStream,
-  } = require("../../common/common");
-  const crypto = require("crypto");
 
   // Move Object
   function S3MoveObject(n) {
