@@ -85,7 +85,7 @@ module.exports = function (RED) {
           },
           function (err, data) {
             if (err) {
-              // Uploading
+              // Show error message
               node.status({
                 fill: "red",
                 shape: "dot",
@@ -112,7 +112,7 @@ module.exports = function (RED) {
                     // Replace the payload with
                     // the returned data from the copyObject response
                     msg.payload = data;
-                    // Append the deleted object
+                    // Append the moved object
                     // key to the message object
                     msg.key = key;
 
