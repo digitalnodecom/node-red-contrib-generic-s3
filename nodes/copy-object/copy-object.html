@@ -25,15 +25,20 @@
         <label for="node-input-versionid"><i class="fa fa-history"></i> <span data-i18n="Version ID">&nbsp;</span>Version ID: </label>
         <input type="text" id="node-input-versionid" data-i18n="[placeholder]t46ZenlYTZBnj">
     </div>
+    <div class="form-row">
+        <label for="node-input-contentencoding"><i class="fa fa-file-code-o"></i> <span data-i18n="Destination Content Encoding">&nbsp;</span>Destination Content Encoding: </label>
+        <input type="text" id="node-input-contentencoding" data-i18n="[placeholder]gzip">
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
-            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code>, <code>Key</code>, <code>Copy Source</code> and(or) <code>Version ID</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code>, <code>Key</code>, <code>Copy Source</code>, <code>Version ID</code> and(or) <code>Destination Content Encoding</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
                 <ul>
                     <li><code>msg.bucket = "test-bucket"</code></li>
                     <li><code>msg.key = "destination.json"</code></li>
                     <li><code>msg.copysource = "/test/test.json"</code></li>
                     <li><code>msg.versionid = "t46ZenlYTZBnj"</code></li>
+                    <li><code>msg.contentencoding = "gzip"</code></li>
                 </ul>
             </li>
         </ul>
@@ -44,9 +49,9 @@
     <p>S3 copy object node. This node is used to copy object from a source
     to specified Bucket with specified Key. The bucket can be specified either directly
     on this node properties or by setting input property <code>msg.bucket</code>.
-    Other parameters should be set as, such as <code>Key</code>, <code>Copy Source</code> and <code>Version Id (optional)</code>.
+    Other parameters should be set as, such as <code>Key</code>, <code>Copy Source</code>, <code>Version Id (optional)</code> and <code>Content Encoding (optional)</code>.
     These parameters can be also set by setting properites of the input message respectively
-    <code>key</code>, <code>copysource</code> and <code>versionid</code>.</p>
+    <code>key</code>, <code>copysource</code>, <code>versionid</code> and <code>contentencoding</code>.</p>
 </script>
 
 <script type="text/javascript">
@@ -60,6 +65,7 @@
             key: {type: 'text', required: false},
             copysource: {type: 'text', required: false},
             versionid: {type: 'text', required: false},
+            contentencoding: {type: 'text', required: false},
         },
         inputs: 1,
         outputs: 1,
