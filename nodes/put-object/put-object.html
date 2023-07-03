@@ -37,10 +37,14 @@
         <label for="node-input-upsert"><i class="fa fa-superpowers"></i> <span data-i18n="Upsert">&nbsp;</span>Upsert: </label>
         <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-upsert">
     </div>
+    <div class="form-row">
+        <label for="node-input-contentencoding"><i class="fa fa-file-code-o"></i> <span data-i18n="Content Encoding">&nbsp;</span>Content Encoding: </label>
+        <input type="text" id="node-input-contentencoding" data-i18n="[placeholder]gzip">
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
-            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> | <code>Key</code> | <code>Content-Type</code> | <code>Body</code> | <code>Stream</code> | <code>Metadata</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> | <code>Key</code> | <code>Content-Type</code> | <code>Body</code> | <code>Stream</code> | <code>Metadata</code> | <code>Content Encoding</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
                 <ul>
                     <li><code>msg.bucket = "test-bucket"</code></li>
                     <li><code>msg.key = "unique-object-key.json"</code></li>
@@ -49,6 +53,7 @@
                     <li><code>msg.stream = false</code></li>
                     <li><code>msg.metadata = { version: '123' }</code></li>
                     <li><code>msg.upsert = true</code></li>
+                    <li><code>msg.contentencoding = "gzip"</code></li>
                 </ul>
             </li>
         </ul>
@@ -64,7 +69,8 @@
     <code>Body</code> - Actual contents of the object |
     <code>Stream</code> - (Optional) The provided body is a stream |
     <code>Metadata</code> - (Optional) Metadata of the object<br>
-    <code>Upsert</code> - (Optional) Specifies wether the objects should be upserted or not</p>
+    <code>Upsert</code> - (Optional) Specifies wether the objects should be upserted or not |
+    <code>Content Encoding</code> - (Optional) Specifies the content encoding</p>
     These values can be specified in the node properites or by setting input properties like the following
     <code>msg.bucket</code> - The bucket |
     <code>msg.key</code> - The object key |
@@ -72,7 +78,8 @@
     <code>msg.body</code> - Actual contents of the object |
     <code>msg.stream</code> - (Optional) The provided body is a stream |
     <code>msg.metadata</code> - (Optional) Metadata of the object |
-    <code>msg.upsert</code> - (Optional) Specifies wether the objects should be upserted or not. <br>
+    <code>msg.upsert</code> - (Optional) Specifies wether the objects should be upserted or not |
+    <code>msg.contentencoding</code> - (Optional) Specifies the content encoding. <br>
     For streamifying the contents of the body we recommend using <a href="https://github.com/digitalnodecom/node-red-contrib-generic-s3/blob/main/common/common.js#L23-L30">this function</a>
     </p>
 </script>
@@ -91,6 +98,7 @@
             stream: {required: false},
             metadata: {required: false},
             upsert: {required: false},
+            contentencoding: {type: 'text', required: false},
         },
         inputs: 1,
         outputs: 1,
