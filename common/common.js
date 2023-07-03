@@ -74,6 +74,7 @@ const createS3formatInputObjectArray = (arr) => {
         ContentType: element.contentType,
         Body: stringToStream(element.body),
         Metadata: element.metadata,
+        ContentEncoding: element.contentencoding
       });
     else
       s3Array.push({
@@ -81,6 +82,7 @@ const createS3formatInputObjectArray = (arr) => {
         Key: element.key,
         ContentType: element.contentType,
         Body: stringToStream(element.body),
+        ContentEncoding: element.contentencoding
       });
   });
 
