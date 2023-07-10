@@ -1,6 +1,7 @@
 module.exports = function (RED) {
   "use strict";
   const { S3 } = require("@aws-sdk/client-s3");
+  const { isValidContentEncoding } = require('../../common/common');
 
   // List items from single bucket
   function S3CopyObject(n) {
@@ -66,6 +67,17 @@ module.exports = function (RED) {
       } else {
         payloadConfig.CopySource = encodeURI(copysource);
       }
+
+      // ContentEncoding parameter
+      let contentencoding = n.contentencoding != "" ? n.contentencoding : null;
+      if (!contentencoding) {
+        contentencoding = msg.contentencoding ? msg.contentencoding : null;
+      }
+      if(contentencoding && !isValidContentEncoding(contentencoding)) {
+        node.error('Invalid content encoding!');
+        return;
+      }
+      payloadConfig.ContentEncoding = contentencoding;
 
       // S3 client init
       let s3Client = null;

@@ -24,15 +24,20 @@
         <label for="node-input-sourcekey"><code><i class="fa fa-magic"></i></code> <span data-i18n="Source Object">&nbsp;</span>Source Object: </label>
         <input type="text" id="node-input-sourcekey" data-i18n="[placeholder]Source Object">
     </div>
+    <div class="form-row">
+        <label for="node-input-contentencoding"><i class="fa fa-file-code-o"></i> <span data-i18n="Destination Content Encoding">&nbsp;</span>Destination Content Encoding: </label>
+        <input type="text" id="node-input-contentencoding" data-i18n="[placeholder]gzip">
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
-            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> | <code>Key</code> | <code>Source Bucket</code> | <code>Source Object</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> | <code>Key</code> | <code>Source Bucket</code> | <code>Source Object</code> | <code>Destination Content Encoding</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
                 <ul>
                     <li><code>msg.bucket = "test-bucket"</code></li>
                     <li><code>msg.key = "object-key.json"</code></li>
                     <li><code>msg.sourcebucket = "new-bucket"</code></li>
                     <li><code>msg.sourcekey = "new-object-key.json"</code></li>
+                    <li><code>msg.contentencoding = "gzip"</code></li>
                 </ul>
             </li>
         </ul>
@@ -46,12 +51,14 @@
     <code>Destination Key</code> - The new object key |
     <code>Source Object</code> - The source object key |
     <code>Source Bucket</code> - The source object bucket |
+    <code>Destination Content Encoding</code> - Content encoding of the destination object |
 
     These values can be specified in the node properites or by setting input properties like the following
     <code>msg.bucket</code> - The new bucket |
     <code>msg.key</code> - The new object key |
     <code>msg.sourcebucket</code> - The old bucket |
     <code>msg.sourcekey</code> - The old object key |
+    <code>msg.contentencoding = "gzip"</code> - Content encoding of the destination object |
     </p>
 </script>
 
@@ -65,7 +72,8 @@
             bucket: { type: 'text', required: false },
             key: { type: 'text', required: false },
             sourcebucket: { type: 'text', required: false },
-            sourcekey: { type: 'text', required: false }
+            sourcekey: { type: 'text', required: false },
+            contentencoding: {type: 'text', required: false},
         },
         inputs: 1,
         outputs: 1,

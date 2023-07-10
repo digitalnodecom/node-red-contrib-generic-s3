@@ -6,6 +6,7 @@ module.exports = function (RED) {
     isJsonString,
     isObject,
     stringToStream,
+    isValidContentEncoding
   } = require("../../common/common");
   const crypto = require("crypto");
 
@@ -97,6 +98,16 @@ module.exports = function (RED) {
         upsert = msg.upsert ? msg.upsert : false;
       }
 
+      // ContentEncoding parameter
+      let contentencoding = n.contentencoding != "" ? n.contentencoding : null;
+      if (!contentencoding) {
+        contentencoding = msg.contentencoding ? msg.contentencoding : null;
+      }
+      if (contentencoding && !isValidContentEncoding(contentencoding)) {
+        node.error("Invalid content encoding!");
+        return;
+      }
+
       // S3 client init
       let s3Client = null;
 
@@ -146,6 +157,7 @@ module.exports = function (RED) {
                     Key: key,
                     ContentType: contentType,
                     Body: bodyToUpload,
+                    ContentEncoding: contentencoding,
                   };
 
                   if (metadata) objectToCreate.Metadata = metadata;
@@ -228,6 +240,7 @@ module.exports = function (RED) {
                       Key: key,
                       ContentType: contentType,
                       Body: bodyToUpload,
+                      ContentEncoding: contentencoding,
                     };
 
                     if (metadata) objectToCreate.Metadata = metadata;
@@ -308,6 +321,7 @@ module.exports = function (RED) {
             Key: key,
             ContentType: contentType,
             Body: bodyToUpload,
+            ContentEncoding: contentencoding,
           };
 
           if (metadata) objectToCreate.Metadata = metadata;
