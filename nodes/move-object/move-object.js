@@ -1,6 +1,7 @@
 module.exports = function (RED) {
   "use strict";
   const { S3 } = require("@aws-sdk/client-s3");
+  const { isValidContentEncoding } = require("../../common/common");
 
   // Move Object
   function S3MoveObject(n) {
@@ -55,6 +56,16 @@ module.exports = function (RED) {
         }
       }
 
+      // ContentEncoding parameter
+      let contentencoding = n.contentencoding != "" ? n.contentencoding : null;
+      if (!contentencoding) {
+        contentencoding = msg.contentencoding ? msg.contentencoding : null;
+      }
+      if (contentencoding && !isValidContentEncoding(contentencoding)) {
+        node.error("Invalid content encoding!");
+        return;
+      }
+
       // S3 client init
       let s3Client = null;
 
@@ -85,6 +96,7 @@ module.exports = function (RED) {
             CopySource: encodeURI(sourcebucket + "/" + sourcekey),
             Bucket: bucket,
             Key: key,
+            ContentEncoding: contentencoding
           },
           function (err, data) {
             if (err) {
