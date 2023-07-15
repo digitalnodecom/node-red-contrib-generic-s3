@@ -55,6 +55,12 @@ module.exports = function (RED) {
         stringifybody = msg.stringifybody ? msg.stringifybody : false;
       }
 
+      // stringifyBody base 64 encoding parameter
+      let stringifybodybase64 = n.stringifybodybase64 ? n.stringifybodybase64 : false;
+      if (!stringifybodybase64) {
+        stringifybodybase64 = msg.stringifybodybase64 ? msg.stringifybodybase64 : false;
+      }
+      
       // S3 client init
       let s3Client = null;
       try {
@@ -91,6 +97,10 @@ module.exports = function (RED) {
               data.BodyAsString = await streamToString(data.Body);
             }
 
+            if (stringifybodybase64) {
+              data.BodyAsStringBase64 = await streamToString(data.Body);
+            }
+            
             // Replace the payload with
             // the returned data
             msg.payload = data;
