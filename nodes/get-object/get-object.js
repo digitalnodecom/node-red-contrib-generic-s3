@@ -2,6 +2,7 @@ module.exports = function (RED) {
   "use strict";
   const { S3 } = require("@aws-sdk/client-s3");
   const { streamToString } = require("../../common/common");
+  const { streamToStringbase64 } = require("../../common/common");
 
   // Get Object
   function S3GetObject(n) {
