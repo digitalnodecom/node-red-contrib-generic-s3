@@ -25,6 +25,10 @@
         <label for="node-input-stringifybody"><i class="fa fa-superpowers"></i> <span data-i18n="Stringify Body">&nbsp;</span>Stringify Body: </label>
         <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-stringifybody">
     </div>
+    <div class="form-row">
+        <label for="node-input-stringifybodybase64"><i class="fa fa-superpowers"></i> <span data-i18n="Stringify Body with base64 encoding">&nbsp;</span>Stringify Body base64 encoding: </label>
+        <input type="checkbox" style="margin: 5px 0px; width: 15px;" id="node-input-stringifybodybase64">
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
@@ -34,6 +38,7 @@
                     <li><code>msg.key = "unique-object-key"</code></li>
                     <li><code>msg.versionid = "t46ZenlYTZBnj"</code></li>
                     <li><code>msg.stringifybody = true</code></li>
+                    <li><code>msg.stringifybodybase64 = true</code></li>
                 </ul>
             </li>
         </ul>
@@ -45,8 +50,8 @@
     metadata from the specified bucket using the configured client. The bucket
     name and the object key can be specified in the properties of the node or
     by setting input properties <code>msg.bucket</code>
-    and(or) <code>msg.key</code> respectively</p> Version ID and Stringify Body are optional and can be set
-    from the node or by setting input properties <code>msg.version</code>, <code>msg.stringifybody</code></p>
+    and(or) <code>msg.key</code> respectively</p> Version ID and Stringify Body as well as Stringify Body base64 encoding are optional and can be set
+    from the node or by setting input properties <code>msg.version</code>, <code>msg.stringifybody</code>, <code>msg.stringifybodybase64</code></p>
 </script>
 
 <script type="text/javascript">
@@ -59,7 +64,8 @@
             bucket: {type: 'text', required: false},
             key: {type: 'text', required: false},
             versionid: {type: 'text', required: false},
-            stringifybody: {required: false}
+            stringifybody: {required: false},
+            stringifybodybase64: {required: false}
         },
         inputs: 1,
         outputs: 1,
