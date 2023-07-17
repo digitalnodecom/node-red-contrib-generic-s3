@@ -23,5 +23,5 @@ client-s3     | Configuration node used in all of the above mentioned nodes to p
 
 #### Install these nodes using the following command or directly via node-red dashboard
 ```bash
-npm install node-red-contrib-generic-s3
+npm install @digitalnodecom/node-red-contrib-generic-s3
 ```
