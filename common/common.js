@@ -29,6 +29,18 @@ const streamToString = (stream) =>
     stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
   });
 
+// Convert stream to buffer
+const streamToBuffer = (stream) =>
+  new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("error", reject);
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+});
+
+// Convert buffer to string with optional encoding
+const bufferToString = (buffer, encoding = 'utf-8') => buffer.toString(encoding);
+
 // Convert stream to string (base 64 encoding)
 const streamToStringbase64 = (stream) =>
   new Promise((resolve, reject) => {
@@ -111,6 +123,9 @@ module.exports = {
   isObject,
   isString,
   streamToString,
+  streamToBuffer,
+  streamToStringbase64,
+  bufferToString,
   stringToStream,
   isValidInputObjectArray,
   createS3formatInputObjectArray,
