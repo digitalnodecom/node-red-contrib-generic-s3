@@ -115,6 +115,7 @@
         "bucket": "",
         "key": "",
         "versionid": "",
+        "stringifybody": false,
         "x": 530,
         "y": 360,
         "wires": [
@@ -335,7 +336,7 @@
         "type": "function",
         "z": "68c732176a3f581e",
         "name": "Parameters",
-        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n// Object's specific version ID\nmsg.versionid = 't46ZenlYTZBnj'\n// Flag which specifies wether the body should be stringified or not\nmsg.stringifybody = true;\n\nreturn msg;",
+        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n// Object's specific version ID\nmsg.versionid = 't46ZenlYTZBnj'\n// Flag which specifies wether the body should be stringified or not\nmsg.stringifybody = true;\n// Flag which specifies wether the body should be stringified with base64 encoding or not (for binary objects in body)\nmsg.stringifybody = true;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
