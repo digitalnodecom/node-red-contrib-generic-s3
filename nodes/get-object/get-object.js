@@ -1,8 +1,8 @@
 module.exports = function (RED) {
   "use strict";
   const { S3 } = require("@aws-sdk/client-s3");
-  const { streamToString } = require("../../common/common");
-  const { streamToStringbase64 } = require("../../common/common");
+  const { Readable } = require("stream");
+  const { bufferToString, streamToBuffer } = require("../../common/common");
 
   // Get Object
   function S3GetObject(n) {
@@ -57,11 +57,15 @@ module.exports = function (RED) {
       }
 
       // stringifyBody base 64 encoding parameter
-      let stringifybodybase64 = n.stringifybodybase64 ? n.stringifybodybase64 : false;
+      let stringifybodybase64 = n.stringifybodybase64
+        ? n.stringifybodybase64
+        : false;
       if (!stringifybodybase64) {
-        stringifybodybase64 = msg.stringifybodybase64 ? msg.stringifybodybase64 : false;
+        stringifybodybase64 = msg.stringifybodybase64
+          ? msg.stringifybodybase64
+          : false;
       }
-      
+
       // S3 client init
       let s3Client = null;
       try {
@@ -93,15 +97,24 @@ module.exports = function (RED) {
             send(msg);
           } else {
             // if not, return message with the payload
+            // ********************************************
+            // Converting stream to buffer so it can be reused
+            const buffer = await streamToBuffer(data.Body);
 
+            // Converting buffer(body) to 'utf-8' string if specified
             if (stringifybody) {
-              data.BodyAsString = await streamToString(data.Body);
+              data.BodyAsString = bufferToString(buffer);
             }
 
+            // Converting buffer(body) to 'base-64' string if specified
             if (stringifybodybase64) {
-              data.BodyAsStringBase64 = await streamToString(data.Body);
+              data.BodyAsStringBase64 = bufferToString(buffer, "base64");
             }
-            
+
+            // Creating new stream from the buffer so
+            // it can be further processed if needed
+            data.Body = Readable.from(buffer);
+
             // Replace the payload with
             // the returned data
             msg.payload = data;
