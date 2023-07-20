@@ -36,10 +36,11 @@ const streamToBuffer = (stream) =>
     stream.on("data", (chunk) => chunks.push(chunk));
     stream.on("error", reject);
     stream.on("end", () => resolve(Buffer.concat(chunks)));
-});
+  });
 
 // Convert buffer to string with optional encoding
-const bufferToString = (buffer, encoding = 'utf-8') => buffer.toString(encoding);
+const bufferToString = (buffer, encoding = "utf-8") =>
+  buffer.toString(encoding);
 
 // Convert stream to string (base 64 encoding)
 const streamToStringbase64 = (stream) =>
@@ -95,7 +96,7 @@ const createS3formatInputObjectArray = (arr) => {
         ContentType: element.contentType,
         Body: stringToStream(element.body),
         Metadata: element.metadata,
-        ContentEncoding: element.contentencoding
+        ContentEncoding: element.contentencoding,
       });
     else
       s3Array.push({
@@ -103,7 +104,7 @@ const createS3formatInputObjectArray = (arr) => {
         Key: element.key,
         ContentType: element.contentType,
         Body: stringToStream(element.body),
-        ContentEncoding: element.contentencoding
+        ContentEncoding: element.contentencoding,
       });
   });
 
@@ -118,6 +119,22 @@ const isValidContentEncoding = (contentEncoding) => {
   return validEncodings.includes(contentEncoding);
 };
 
+const isValidACL = (acl) => {
+  // Define the valid ACL permission values
+  const validACLValues = [
+    "private",
+    "public-read",
+    "public-read-write",
+    "authenticated-read",
+    "aws-exec-read",
+    "bucket-owner-read",
+    "bucket-owner-full-control",
+  ];
+
+  // Check if the input ACL is in the list of valid ACL permission values
+  return validACLValues.includes(acl);
+};
+
 module.exports = {
   isJsonString,
   isObject,
@@ -129,5 +146,6 @@ module.exports = {
   stringToStream,
   isValidInputObjectArray,
   createS3formatInputObjectArray,
-  isValidContentEncoding
+  isValidContentEncoding,
+  isValidACL,
 };

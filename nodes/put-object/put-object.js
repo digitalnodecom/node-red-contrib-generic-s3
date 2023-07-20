@@ -6,7 +6,8 @@ module.exports = function (RED) {
     isJsonString,
     isObject,
     stringToStream,
-    isValidContentEncoding
+    isValidContentEncoding,
+    isValidACL,
   } = require("../../common/common");
   const crypto = require("crypto");
 
@@ -31,6 +32,7 @@ module.exports = function (RED) {
       let metadata = n.metadata !== "" ? n.metadata : null; // Metadata of the object
       let contentType = n.contentType !== "" ? n.contentType : null; // Content-Type of the object
       let upsert = n.upsert ? n.upsert : false; // Upsert flag
+      let acl = n.acl && n.acl !== "" ? n.acl : false; // ACL permissions
 
       // Checking for correct properties input
       if (!bucket) {
@@ -108,6 +110,11 @@ module.exports = function (RED) {
         return;
       }
 
+      if (acl && !isValidACL(acl)) {
+        node.error("Invalid ACL permissions value");
+        return;
+      }
+
       // S3 client init
       let s3Client = null;
 
@@ -158,6 +165,7 @@ module.exports = function (RED) {
                     ContentType: contentType,
                     Body: bodyToUpload,
                     ContentEncoding: contentencoding,
+                    ACL: acl,
                   };
 
                   if (metadata) objectToCreate.Metadata = metadata;
@@ -241,6 +249,7 @@ module.exports = function (RED) {
                       ContentType: contentType,
                       Body: bodyToUpload,
                       ContentEncoding: contentencoding,
+                      ACL: acl,
                     };
 
                     if (metadata) objectToCreate.Metadata = metadata;
@@ -322,6 +331,7 @@ module.exports = function (RED) {
             ContentType: contentType,
             Body: bodyToUpload,
             ContentEncoding: contentencoding,
+            ACL: acl,
           };
 
           if (metadata) objectToCreate.Metadata = metadata;
