@@ -110,6 +110,10 @@ module.exports = function (RED) {
         return;
       }
 
+      // ACL parameter
+      if(!acl) {
+        acl = msg.acl ? msg.acl : null;
+      }
       if (acl && !isValidACL(acl)) {
         node.error("Invalid ACL permissions value");
         return;
