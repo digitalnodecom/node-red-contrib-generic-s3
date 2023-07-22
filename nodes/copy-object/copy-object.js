@@ -1,7 +1,7 @@
 module.exports = function (RED) {
   "use strict";
   const { S3 } = require("@aws-sdk/client-s3");
-  const { isValidContentEncoding } = require('../../common/common');
+  const { isValidContentEncoding, isValidACL } = require("../../common/common");
 
   // List items from single bucket
   function S3CopyObject(n) {
@@ -73,11 +73,24 @@ module.exports = function (RED) {
       if (!contentencoding) {
         contentencoding = msg.contentencoding ? msg.contentencoding : null;
       }
-      if(contentencoding && !isValidContentEncoding(contentencoding)) {
-        node.error('Invalid content encoding!');
+      if (contentencoding && !isValidContentEncoding(contentencoding)) {
+        node.error("Invalid content encoding!");
         return;
       }
       payloadConfig.ContentEncoding = contentencoding;
+
+      let acl = n.acl && n.acl !== "" ? n.acl : false; // ACL permissions
+
+      // ACL parameter
+      if (!acl) {
+        acl = msg.acl ? msg.acl : null;
+      }
+      if (acl && !isValidACL(acl)) {
+        node.error("Invalid ACL permissions value");
+        return;
+      }
+
+      payloadConfig.ACL = acl;
 
       // S3 client init
       let s3Client = null;
