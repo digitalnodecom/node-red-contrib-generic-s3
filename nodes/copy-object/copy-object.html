@@ -1,4 +1,3 @@
-
 <!-- BEGIN COPY OBJECT -->
 <script type="text/x-red" data-template-name="Copy Object">
     <div class="form-row">
@@ -29,6 +28,19 @@
         <label for="node-input-contentencoding"><i class="fa fa-file-code-o"></i> <span data-i18n="Destination Content Encoding">&nbsp;</span>Destination Content Encoding: </label>
         <input type="text" id="node-input-contentencoding" data-i18n="[placeholder]gzip">
     </div>
+     <div class="form-row">
+    <label for="node-input-acl"><i class="fa fa-lock"></i> <span data-i18n="acl">&nbsp;</span>ACL: </label>
+        <select id="node-input-acl">
+            <option value="" selected>Choose ACL permissions</option>
+            <option value="private">Private</option>
+            <option value="public-read">Public Read</option>
+            <option value="public-read-write">Public Read Write</option>
+            <option value="authenticated-read">Authenticated Read</option>
+            <option value="aws-exec-read">AWS Exec Read</option>
+            <option value="bucket-owner-read">Bucker Owner Read</option>
+            <option value="bucket-owner-full-control">Bucket Owner Full Control</option>
+        </select>
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
@@ -39,6 +51,7 @@
                     <li><code>msg.copysource = "/test/test.json"</code></li>
                     <li><code>msg.versionid = "t46ZenlYTZBnj"</code></li>
                     <li><code>msg.contentencoding = "gzip"</code></li>
+                    <li><code>msg.acl = "public-read"</code></li>
                 </ul>
             </li>
         </ul>
@@ -51,26 +64,27 @@
     on this node properties or by setting input property <code>msg.bucket</code>.
     Other parameters should be set as, such as <code>Key</code>, <code>Copy Source</code>, <code>Version Id (optional)</code> and <code>Content Encoding (optional)</code>.
     These parameters can be also set by setting properites of the input message respectively
-    <code>key</code>, <code>copysource</code>, <code>versionid</code> and <code>contentencoding</code>.</p>
+    <code>key</code>, <code>copysource</code>, <code>versionid</code>, <code>contentencoding</code> and, <code>msg.acl (optional)</code>.</p>
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('Copy Object',{
+    RED.nodes.registerType('Copy Object', {
         category: 'storage-input',
-        color:"#FFFFFF",
+        color: "#FFFFFF",
         defaults: {
-            name: {value: ""},
-            conf: {type:"client-s3", required:true},
-            bucket: {type: 'text', required: false},
-            key: {type: 'text', required: false},
-            copysource: {type: 'text', required: false},
-            versionid: {type: 'text', required: false},
-            contentencoding: {type: 'text', required: false},
+            name: { value: "" },
+            conf: { type: "client-s3", required: true },
+            bucket: { type: 'text', required: false },
+            key: { type: 'text', required: false },
+            copysource: { type: 'text', required: false },
+            versionid: { type: 'text', required: false },
+            contentencoding: { type: 'text', required: false },
+            acl: { type: 'text', required: false },
         },
         inputs: 1,
         outputs: 1,
         icon: "s3Logo.png",
-        label: function() {
+        label: function () {
             return this.name ? this.name : "Copy Object";
         }
     });
