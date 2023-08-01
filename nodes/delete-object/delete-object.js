@@ -77,7 +77,7 @@ function inputHandler(n, RED) {
       msg.key = n.key;
       this.status({ fill: "red", shape: "dot", text: "Failure" });
     } finally {
-      s3Client.destroy();
+      if(s3Client) s3Client.destroy();
       /* Dereference vars */
       s3Client = null;
       /*********************/
