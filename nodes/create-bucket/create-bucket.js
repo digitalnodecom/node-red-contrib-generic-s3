@@ -1,97 +1,75 @@
-module.exports = function (RED) {
-  "use strict";
-  const { S3 } = require("@aws-sdk/client-s3");
+module.exports = function S3CreateBucket(RED) {
+  const nodeInstance = instanceNode(RED);
+  RED.nodes.registerType("Create Bucket", nodeInstance);
+};
 
-  // Create bucket
-  function S3CreateBucket(n) {
+function instanceNode(RED) {
+  return function nodeInstance(n) {
     RED.nodes.createNode(this, n); // Getting options for the current node
     this.conf = RED.nodes.getNode(n.conf); // Getting configuration
-    var node = this; // Referencing the current node
-    var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-
-    // If there is no conifg
+    let config = this.conf ? this.conf : null; // Cheking if the conf is valid
     if (!config) {
-      node.warn(RED._("Missing S3 Client Configuration!"));
+      this.warn(RED._("Missing S3 Client Configuration!"));
       return;
     }
+    // Bucket parameter
+    this.bucket = n.bucket != "" ? n.bucket : null;
+    // Input Handler
+    this.on("input", inputHandler(this, RED));
+  };
+}
 
-    this.on("input", async function (msg, send, done) {
-      let bucket = n.bucket != "" ? n.bucket : null; // Bucket info
-      // Checking for correct properties input
-      if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
-        if (!bucket) {
-          node.error("No bucket provided!");
-          return;
-        }
+function inputHandler(n, RED) {
+  return async function nodeInputHandler(msg, send, done) {
+    const { S3 } = require("@aws-sdk/client-s3");
+
+    // Checking for correct properties input
+    if (!n.bucket) {
+      n.bucket = msg.bucket ? msg.bucket : null;
+      if (!n.bucket) {
+        this.error("No bucket provided!");
+        return;
       }
+    }
 
-      let s3Client = null;
-      try {
-        // Creating S3 client
-        s3Client = new S3({
-          endpoint: config.endpoint,
-          forcePathStyle: config.forcepathstyle,
-          region: config.region,
-          credentials: {
-            accessKeyId: config.credentials.accesskeyid,
-            secretAccessKey: config.credentials.secretaccesskey,
-          },
-        });
-
-        // Creating bucket
-        node.status({ fill: "blue", shape: "dot", text: "Creating Bucket" });
-        s3Client.createBucket({ Bucket: bucket }, function (err, data) {
-          if (err) {
-            node.status({ fill: "red", shape: "dot", text: `Failure` });
-            node.error(err);
-            // Replace the payload with null
-            msg.payload = null;
-            // Append the bucket to
-            // the message object
-            msg.bucket = bucket;
-
-            // Return the complete message object
-            send(msg);
-          } else {
-            // Replace the payload with
-            // the returned data
-            msg.payload = data;
-            // Append the bucket to
-            // the message object
-            msg.bucket = bucket;
-
-            // Return the complete message object
-            send(msg);
-
-            node.status({ fill: "green", shape: "dot", text: "Success" });
-          }
-
-          node.status({ fill: "green", shape: "dot", text: `Created!` });
-          // Finalize
-          if (done) {
-            s3Client.destroy();
-            done();
-          }
-
-          setTimeout(() => {
-            node.status({});
-          }, 3000);
-        });
-      } catch (err) {
-        // If error occurs
-        node.error(err);
-        // Cleanup
-        if (s3Client !== null) s3Client.destroy();
-        if (done) done();
-
-        node.status({ fill: "red", shape: "dot", text: "Failure" });
-        setTimeout(() => {
-          node.status({});
-        }, 5000);
-      }
-    });
-  }
-
-  RED.nodes.registerType("Create Bucket", S3CreateBucket);
-};
+    let s3Client = null;
+    try {
+      // Creating S3 client
+      s3Client = new S3({
+        endpoint: n.conf.endpoint,
+        forcePathStyle: n.conf.forcepathstyle,
+        region: n.conf.region,
+        credentials: {
+          accessKeyId: n.conf.credentials.accesskeyid,
+          secretAccessKey: n.conf.credentials.secretaccesskey,
+        },
+      });
+      // Creating bucket
+      this.status({ fill: "blue", shape: "dot", text: "Creating Bucket" });
+      const result = await s3Client.createBucket({ Bucket: n.bucket });
+      // Append the result to msg.payload
+      msg.payload = result;
+      // Append the bucket to
+      // the message object
+      msg.bucket = n.bucket;
+      send(msg);
+      this.status({ fill: "green", shape: "dot", text: `Created!` });
+    } catch (err) {
+      // If error occurs
+      this.error(err);
+      msg.error = err;
+      msg.payload = null;
+      send(msg);
+      this.status({ fill: "red", shape: "dot", text: "Failure" });
+    } finally {
+      if(s3Client) s3Client.destroy();
+      /* Dereference vars */
+      s3Client = null;
+      /*********************/
+      setTimeout(() => {
+        this.status({});
+      }, 3000);
+      done();
+    }
+  };
+}

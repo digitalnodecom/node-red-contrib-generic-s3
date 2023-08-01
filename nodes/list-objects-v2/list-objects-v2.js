@@ -1,150 +1,135 @@
-module.exports = function (RED) {
-  "use strict";
-  const { S3 } = require("@aws-sdk/client-s3");
+module.exports = function S3ListObjects(RED) {
+  const nodeInstance = instanceNode(RED);
+  RED.nodes.registerType("List Objects V2", nodeInstance);
+};
 
-  // List items from single bucket
-  function S3ListObjects(n) {
+function instanceNode(RED) {
+  return function nodeInstance(n) {
     RED.nodes.createNode(this, n); // Getting options for the current node
     this.conf = RED.nodes.getNode(n.conf); // Getting configuration
-    var node = this; // Referencing the current node
-    var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-
+    let config = this.conf ? this.conf : null; // Cheking if the conf is valid
     if (!config) {
-      node.warn(RED._("Missing S3 Client Configuration!"));
+      this.warn(RED._("Missing S3 Client Configuration!"));
       return;
     }
+    // Bucket parameter
+    this.bucket = n.bucket != "" ? n.bucket : null;
+    // max-keys parameter
+    this.maxkeys = n.maxkeys != "" ? Number(n.maxkeys) : null;
+    // key-marker parameter
+    this.startafter = n.startafter != "" ? n.startafter : null;
+    // prefix parameter
+    this.prefix = n.prefix != "" ? n.prefix : null;
+    // ContinuationToken parameter
+    this.continuationtoken =
+      n.continuationtoken != "" ? n.continuationtoken : null;
+    // Input Handler
+    this.on("input", inputHandler(this, RED));
+  };
+}
 
-    this.on("input", async function (msg, send, done) {
-      /**
-       * Create a payloadConfig object containing parameters to be sent to S3 API
-       * https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html#API_ListObjectsV2_RequestSyntax
-       */
-      let payloadConfig = {};
+function inputHandler(n, RED) {
+  return async function nodeInputHandler(msg, send, done) {
+    const { S3 } = require("@aws-sdk/client-s3");
 
-      // Bucket parameter
-      let bucket = n.bucket != "" ? n.bucket : null;
-      if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
-        if (!bucket) {
-          node.error("No bucket provided!");
+    // Configuration for client
+    const payloadConfig = {};
+
+    // Bucket parameter
+    if (!n.bucket) {
+      n.bucket = msg.bucket ? msg.bucket : null;
+      if (!n.bucket) {
+        node.error("No bucket provided!");
+        return;
+      }
+    }
+    payloadConfig.Bucket = n.bucket;
+
+    // max-keys parameter
+    if (!n.maxkeys) {
+      n.maxkeys = msg.maxkeys ? msg.maxkeys : null;
+    }
+    if (n.maxkeys) {
+      if (!Number.isInteger(n.maxkeys)) {
+        node.error("The maxkeys should be of type Integer!");
+        return;
+      } else {
+        if (n.maxkeys <= 0) {
+          node.error("The maxkeys properties should be positive number!");
           return;
         }
+        payloadConfig.MaxKeys = n.maxkeys;
       }
-      payloadConfig.Bucket = bucket;
+    }
 
-      // max-keys parameter
-      let maxkeys = n.maxkeys != "" ? Number(n.maxkeys) : null;
-      if (!maxkeys) {
-        maxkeys = msg.maxkeys ? msg.maxkeys : null;
-      }
-      if (maxkeys) {
-        if (!Number.isInteger(maxkeys)) {
-          node.error("The maxkeys should be of type Integer!");
-          return;
-        } else {
-          if (maxkeys <= 0) {
-            node.error("The maxkeys properties should be positive number!");
-            return;
-          }
-          payloadConfig.MaxKeys = maxkeys;
-        }
-      }
+    // marker parameter
+    if (!n.startafter) {
+      n.startafter = msg.startafter ? msg.startafter : null;
+    }
+    if (n.startafter) {
+      payloadConfig.StartAfter = n.startafter;
+    }
 
-      // marker parameter
-      let startafter = n.startafter != "" ? n.startafter : null;
-      if (!startafter) {
-        startafter = msg.startafter ? msg.startafter : null;
-      }
-      if (startafter) {
-        payloadConfig.StartAfter = startafter;
-      }
+    // prefix parameter
+    if (!n.prefix) {
+      n.prefix = msg.prefix ? msg.prefix : null;
+    }
+    if (n.prefix) {
+      payloadConfig.Prefix = n.prefix;
+    }
 
-      // prefix parameter
-      let prefix = n.prefix != "" ? n.prefix : null;
-      if (!prefix) {
-        prefix = msg.prefix ? msg.prefix : null;
-      }
-      if (prefix) {
-        payloadConfig.Prefix = prefix;
-      }
+    if (!n.continuationtoken) {
+      n.continuationtoken = msg.continuationtoken
+        ? msg.continuationtoken
+        : null;
+    }
+    if (n.continuationtoken) {
+      payloadConfig.ContinuationToken = n.continuationtoken;
+    }
 
-      // ContinuationToken parameter
-      let continuationtoken =
-        n.continuationtoken != "" ? n.continuationtoken : null;
-      if (!continuationtoken) {
-        continuationtoken = msg.continuationtoken
-          ? msg.continuationtoken
-          : null;
-      }
-      if (continuationtoken) {
-        payloadConfig.ContinuationToken = continuationtoken;
-      }
+    // S3 client init
+    let s3Client = null;
+    try {
+      // Creating S3 client
+      s3Client = new S3({
+        endpoint: n.conf.endpoint,
+        forcePathStyle: n.conf.forcepathstyle,
+        region: n.conf.region,
+        credentials: {
+          accessKeyId: n.conf.credentials.accesskeyid,
+          secretAccessKey: n.conf.credentials.secretaccesskey,
+        },
+      });
 
-      // S3 client init
-      let s3Client = null;
-      try {
-        // Creating S3 client
-        s3Client = new S3({
-          endpoint: config.endpoint,
-          forcePathStyle: config.forcepathstyle,
-          region: config.region,
-          credentials: {
-            accessKeyId: config.credentials.accesskeyid,
-            secretAccessKey: config.credentials.secretaccesskey,
-          },
-        });
+      this.status({ fill: "blue", shape: "dot", text: "Fetching" });
 
-        node.status({ fill: "blue", shape: "dot", text: "Fetching" });
-        // List all objects from the desired bucket
-        s3Client.listObjectsV2(payloadConfig, function (err, data) {
-          if (err) {
-            node.status({ fill: "red", shape: "dot", text: `Failure` });
-            node.error(err);
-            // Replace the payload with null
-            msg.payload = null;
-            // Append the bucket to
-            // the message object
-            msg.bucket = bucket;
-
-            // Return the complete message object
-            send(msg);
-          } else {
-            // Replace the payload with
-            // the returned data
-            msg.payload = data;
-            // Append the bucket to
-            // the message object
-            msg.bucket = bucket;
-
-            // Return the complete message object
-            send(msg);
-
-            // Finalize
-            if (done) {
-              s3Client.destroy();
-              done();
-            }
-
-            node.status({ fill: "green", shape: "dot", text: "Success" });
-            setTimeout(() => {
-              node.status({});
-            }, 2000);
-          }
-        });
-      } catch (err) {
-        // If error occurs
-        node.error(err);
-        // Cleanup
-        if (s3Client !== null) s3Client.destroy();
-        if (done) done();
-
-        node.status({ fill: "red", shape: "dot", text: "Failure" });
-        setTimeout(() => {
-          node.status({});
-        }, 3000);
-      }
-    });
-  }
-
-  RED.nodes.registerType("List Objects V2", S3ListObjects);
-};
+      // List all object versions from the desired bucket
+      const result = await s3Client.listObjectsV2(payloadConfig);
+      msg.payload = result;
+      msg.bucket = payloadConfig.Bucket;
+      // Return the complete message object
+      send(msg);
+      this.status({ fill: "green", shape: "dot", text: "Success" });
+    } catch (err) {
+      // If error occurs
+      this.error(err);
+      this.status({ fill: "red", shape: "dot", text: "Failure" });
+      // Replace the payload with null
+      msg.payload = null;
+      msg.error = err;
+      // Append the bucket
+      // to the message object
+      msg.bucket = payloadConfig.Bucket;
+      send(msg);
+    } finally {
+      if(s3Client) s3Client.destroy();
+      /* Dereference vars */
+      s3Client = null;
+      /*********************/
+      setTimeout(() => {
+        this.status({});
+      }, 3000);
+      done();
+    }
+  };
+}

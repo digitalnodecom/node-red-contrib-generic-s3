@@ -1,157 +1,152 @@
-module.exports = function (RED) {
-  "use strict";
-  const { S3 } = require("@aws-sdk/client-s3");
-  const { Readable } = require("stream");
-  const { bufferToString, streamToBuffer } = require("../../common/common");
+module.exports = function S3GetObject(RED) {
+  const nodeInstance = instanceNode(RED);
+  RED.nodes.registerType("Get Object", nodeInstance);
+};
 
-  // Get Object
-  function S3GetObject(n) {
+function instanceNode(RED) {
+  return function nodeInstance(n) {
     RED.nodes.createNode(this, n); // Getting options for the current node
     this.conf = RED.nodes.getNode(n.conf); // Getting configuration
-    var node = this; // Referencing the current node
-    var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-
+    let config = this.conf ? this.conf : null; // Cheking if the conf is valid
     if (!config) {
-      node.warn(RED._("Missing S3 Client Configuration!"));
+      this.warn(RED._("Missing S3 Client Configuration!"));
       return;
     }
+    // Bucket parameter
+    this.bucket = n.bucket != "" ? n.bucket : null;
+    // Key parameter
+    this.key = n.key != "" ? n.key : null;
+    // Version ID
+    this.versionid = n.versionid != "" ? n.versionid : null;
+    // Stringify body parameter
+    this.stringifybody = n.stringifybody ? n.stringifybody : false;
+    // Stringify body as Base64 parameter
+    this.stringifybodybase64 = n.stringifybodybase64
+      ? n.stringifybodybase64
+      : false;
+    this.on("input", inputHandler(this, RED));
+  };
+}
 
-    this.on("input", async function (msg, send, done) {
-      let bucket = n.bucket != "" ? n.bucket : null;
-      let key = n.key != "" ? n.key : null;
+function inputHandler(n, RED) {
+  return async function nodeInputHandler(msg, send, done) {
+    // Imports
+    const { S3 } = require("@aws-sdk/client-s3");
+    const { Readable } = require("stream");
+    const { bufferToString, streamToBuffer } = require("../../common/common");
 
-      let getObjectPayload = {};
+    // Configuration for client
+    const payloadConfig = {};
+    // Stringify body
+    const stringifyBody = {
+      string: false,
+      base64: false,
+    };
 
-      // Checking for correct properties input
-      if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
-        if (!bucket) {
-          node.error("No bucket provided!");
-          return;
-        }
+    // Checking for correct properties input
+    // Bucket parameter
+    if (!n.Bucket) {
+      n.Bucket = msg.bucket ? msg.bucket : null;
+      if (!n.Bucket) {
+        this.error("No bucket provided!");
+        return;
       }
-      getObjectPayload.Bucket = bucket;
+    }
+    payloadConfig.Bucket = n.bucket;
 
-      if (!key) {
-        key = msg.key ? msg.key : null;
-        if (!key) {
-          node.error("No object key provided!");
-          return;
-        }
+    // Key parameter
+    if (!n.key) {
+      n.key = msg.key ? msg.key : null;
+      if (!n.key) {
+        this.error("No object key provided!");
+        return;
       }
-      getObjectPayload.Key = key;
+    }
+    payloadConfig.Key = n.key;
 
-      // versionId parameter
-      let versionid = n.versionid != "" ? n.versionid : null;
-      if (!versionid) {
-        versionid = msg.versionid ? msg.versionid : null;
-      }
-      if (versionid) {
-        getObjectPayload.VersionId = versionid;
-      }
+    // Version ID parameter
+    if (!n.VersionId) {
+      payloadConfig.VersionId = msg.versionid ? msg.versionid : null;
+    }
 
-      // stringifyBody parameter
-      let stringifybody = n.stringifybody ? n.stringifybody : false;
-      if (!stringifybody) {
-        stringifybody = msg.stringifybody ? msg.stringifybody : false;
-      }
+    // Stringify body parameter
+    if (!n.stringifybody) {
+      n.stringifybody = msg.stringifybody ? msg.stringifybody : false;
+    }
+    stringifyBody.string = n.stringifybody;
 
-      // stringifyBody base 64 encoding parameter
-      let stringifybodybase64 = n.stringifybodybase64
-        ? n.stringifybodybase64
+    // StringifyBody base 64 encoding parameter
+    if (!n.stringifybodybase64) {
+      n.stringifybodybase64 = msg.stringifybodybase64
+        ? msg.stringifybodybase64
         : false;
-      if (!stringifybodybase64) {
-        stringifybodybase64 = msg.stringifybodybase64
-          ? msg.stringifybodybase64
-          : false;
+    }
+    stringifyBody.base64 = n.stringifybodybase64;
+
+    // S3 client init
+    let s3Client = null;
+    try {
+      // Creating S3 client
+      s3Client = new S3({
+        endpoint: n.conf.endpoint,
+        forcePathStyle: n.conf.forcepathstyle,
+        region: n.conf.region,
+        credentials: {
+          accessKeyId: n.conf.credentials.accesskeyid,
+          secretAccessKey: n.conf.credentials.secretaccesskey,
+        },
+      });
+
+      this.status({ fill: "blue", shape: "dot", text: "Fetching" });
+
+      let result = await s3Client.getObject(payloadConfig);
+      // Converting stream to buffer so it can be reused
+      const buffer = await streamToBuffer(result.Body);
+
+      // Converting buffer(body) to 'utf-8' string if specified
+      if (stringifyBody.string) {
+        result.BodyAsString = bufferToString(buffer);
       }
 
-      // S3 client init
-      let s3Client = null;
-      try {
-        // Creating S3 client
-        s3Client = new S3({
-          endpoint: config.endpoint,
-          forcePathStyle: config.forcepathstyle,
-          region: config.region,
-          credentials: {
-            accessKeyId: config.credentials.accesskeyid,
-            secretAccessKey: config.credentials.secretaccesskey,
-          },
-        });
-
-        node.status({ fill: "blue", shape: "dot", text: "Fetching" });
-
-        s3Client.getObject(getObjectPayload, async function (err, data) {
-          // If an error occured, print the error
-          if (err) {
-            node.status({ fill: "red", shape: "dot", text: `Failure` });
-            node.error(err);
-            // Replace the payload with null
-            msg.payload = null;
-            // Append the object
-            // key to the message object
-            msg.key = key;
-
-            // Return the complete message object
-            send(msg);
-          } else {
-            // if not, return message with the payload
-            // ********************************************
-            // Converting stream to buffer so it can be reused
-            const buffer = await streamToBuffer(data.Body);
-
-            // Converting buffer(body) to 'utf-8' string if specified
-            if (stringifybody) {
-              data.BodyAsString = bufferToString(buffer);
-            }
-
-            // Converting buffer(body) to 'base-64' string if specified
-            if (stringifybodybase64) {
-              data.BodyAsStringBase64 = bufferToString(buffer, "base64");
-            }
-
-            // Creating new stream from the buffer so
-            // it can be further processed if needed
-            data.Body = Readable.from(buffer);
-
-            // Replace the payload with
-            // the returned data
-            msg.payload = data;
-            // Append the object
-            // key to the message object
-            msg.key = key;
-
-            // Return the complete message object
-            send(msg);
-
-            node.status({ fill: "green", shape: "dot", text: "Success" });
-          }
-
-          // Finalize
-          if (done) {
-            s3Client.destroy();
-            done();
-          }
-
-          setTimeout(() => {
-            node.status({});
-          }, 2000);
-        });
-      } catch (err) {
-        // If error occurs
-        node.error(err);
-        // Cleanup
-        if (s3Client !== null) s3Client.destroy();
-        if (done) done();
-
-        node.status({ fill: "red", shape: "dot", text: "Failure" });
-        setTimeout(() => {
-          node.status({});
-        }, 3000);
+      // Converting buffer(body) to 'base-64' string if specified
+      if (stringifyBody.base64) {
+        result.BodyAsStringBase64 = bufferToString(buffer, "base64");
       }
-    });
-  }
 
-  RED.nodes.registerType("Get Object", S3GetObject);
-};
+      // Creating new stream from the buffer so
+      // it can be further processed if needed
+      result.Body = Readable.from(buffer);
+
+      // Replace the payload with
+      // the returned data
+      msg.payload = result;
+      // Append the object
+      // key to the message object
+      msg.key = payloadConfig.Key;
+
+      // Return the complete message object
+      send(msg);
+      this.status({ fill: "green", shape: "dot", text: "Success" });
+    } catch (err) {
+      // If error occurs
+      this.error(err);
+      this.status({ fill: "red", shape: "dot", text: "Failure" });
+      // Replace the payload with null
+      msg.payload = null;
+      msg.error = err;
+      // Append the object
+      // key to the message object
+      msg.key = payloadConfig.Key;
+      send(msg);
+    } finally {
+      if(s3Client) s3Client.destroy();
+      /* Dereference vars */
+      s3Client = null;
+      /*********************/
+      setTimeout(() => {
+        this.status({});
+      }, 3000);
+      done();
+    }
+  };
+}

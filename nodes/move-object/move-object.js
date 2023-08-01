@@ -1,170 +1,134 @@
-module.exports = function (RED) {
-  "use strict";
-  const { S3 } = require("@aws-sdk/client-s3");
-  const { isValidContentEncoding } = require("../../common/common");
+module.exports = function S3MoveObject(RED) {
+  const nodeInstance = instanceNode(RED);
+  RED.nodes.registerType("Move Object", nodeInstance);
+};
 
-  // Move Object
-  function S3MoveObject(n) {
+function instanceNode(RED) {
+  return function nodeInstance(n) {
     RED.nodes.createNode(this, n); // Getting options for the current node
     this.conf = RED.nodes.getNode(n.conf); // Getting configuration
-    var node = this; // Referencing the current node
-    var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-
-    // If there is no conifg
+    let config = this.conf ? this.conf : null; // Cheking if the conf is valid
     if (!config) {
-      node.warn(RED._("Missing S3 Client Configuration!"));
+      this.warn(RED._("Missing S3 Client Configuration!"));
+      return;
+    }
+    // Bucket parameter
+    this.bucket = n.bucket != "" ? n.bucket : null;
+    // Destination object key parameter
+    this.key = n.key !== "" ? n.key : null;
+    // Source object key
+    this.sourcekey = n.sourcekey !== "" ? n.sourcekey : null;
+    // Source bucket
+    this.sourcebucket = n.sourcebucket !== "" ? n.sourcebucket : null;
+    // ContentEncoding parameter
+    this.contentencoding = n.contentencoding != "" ? n.contentencoding : null;
+    // Input Handler
+    this.on("input", inputHandler(this, RED));
+  };
+}
+
+function inputHandler(n, RED) {
+  return async function nodeInputHandler(msg, send, done) {
+    // Imports
+    const { S3 } = require("@aws-sdk/client-s3");
+    const { isValidContentEncoding } = require("../../common/common");
+
+    // Checking for correct properties input
+    if (!n.bucket) {
+      n.bucket = msg.bucket ? msg.bucket : null;
+      if (!n.bucket) {
+        this.error("No bucket provided!");
+        return;
+      }
+    }
+
+    if (!n.key) {
+      n.key = msg.key ? msg.key : null;
+      if (!n.key) {
+        this.error("No object key provided!");
+        return;
+      }
+    }
+
+    if (!n.sourcebucket) {
+      n.sourcebucket = msg.sourcebucket ? msg.sourcebucket : null;
+      if (!n.sourcebucket) {
+        this.error("No sourcebucket provided!");
+        return;
+      }
+    }
+
+    if (!n.sourcekey) {
+      n.sourcekey = msg.sourcekey ? msg.sourcekey : null;
+      if (!n.sourcekey) {
+        this.error("No sourcekey provided!");
+        return;
+      }
+    }
+
+    if (!n.contentencoding) {
+      n.contentencoding = msg.contentencoding ? msg.contentencoding : null;
+    }
+    if (n.contentencoding && !isValidContentEncoding(n.contentencoding)) {
+      this.error("Invalid content encoding!");
       return;
     }
 
-    this.on("input", async function (msg, send, done) {
-      let bucket = n.bucket !== "" ? n.bucket : null; // Destination bucket
-      let key = n.key !== "" ? n.key : null; // Destination object key
+    // S3 client init
+    let s3Client = null;
+    try {
+      // Creating S3 client
+      s3Client = new S3({
+        endpoint: n.conf.endpoint,
+        forcePathStyle: n.conf.forcepathstyle,
+        region: n.conf.region,
+        credentials: {
+          accessKeyId: n.conf.credentials.accesskeyid,
+          secretAccessKey: n.conf.credentials.secretaccesskey,
+        },
+      });
 
-      let sourcekey = n.sourcekey !== "" ? n.sourcekey : null; // Source bucket
-      let sourcebucket = n.sourcebucket !== "" ? n.sourcebucket : null; // Source object key
+      // Uploading
+      this.status({
+        fill: "blue",
+        shape: "dot",
+        text: "Copying...",
+      });
 
-      // Checking for correct properties input
-      if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
-        if (!bucket) {
-          node.error("No bucket provided!");
-          return;
-        }
-      }
-
-      if (!key) {
-        key = msg.key ? msg.key : null;
-        if (!key) {
-          node.error("No object key provided!");
-          return;
-        }
-      }
-
-      if (!sourcebucket) {
-        sourcebucket = msg.sourcebucket ? msg.sourcebucket : null;
-        if (!sourcebucket) {
-          node.error("No sourcebucket provided!");
-          return;
-        }
-      }
-
-      if (!sourcekey) {
-        sourcekey = msg.sourcekey ? msg.sourcekey : null;
-        if (!sourcekey) {
-          node.error("No sourcekey provided!");
-          return;
-        }
-      }
-
-      // ContentEncoding parameter
-      let contentencoding = n.contentencoding != "" ? n.contentencoding : null;
-      if (!contentencoding) {
-        contentencoding = msg.contentencoding ? msg.contentencoding : null;
-      }
-      if (contentencoding && !isValidContentEncoding(contentencoding)) {
-        node.error("Invalid content encoding!");
-        return;
-      }
-
-      // S3 client init
-      let s3Client = null;
-
-      try {
-        // Creating S3 client
-        s3Client = new S3({
-          endpoint: config.endpoint,
-          forcePathStyle: config.forcepathstyle,
-          region: config.region,
-          credentials: {
-            accessKeyId: config.credentials.accesskeyid,
-            secretAccessKey: config.credentials.secretaccesskey,
-          },
-        });
-
-        // Uploading
-        node.status({
-          fill: "blue",
-          shape: "dot",
-          text: "Copying...",
-        });
-
-        // Object move is actually two step process
-        // 1. The object is copied from the specified source bucket to destination bucket with the specified key
-        // 2. Then the source object is removed from the source bucket
-        s3Client.copyObject(
-          {
-            CopySource: encodeURI(sourcebucket + "/" + sourcekey),
-            Bucket: bucket,
-            Key: key,
-            ContentEncoding: contentencoding
-          },
-          function (err, data) {
-            if (err) {
-              // Show error message
-              node.status({
-                fill: "red",
-                shape: "dot",
-                text: "Failure",
-              });
-
-              node.error(err);
-            } else {
-              // If the object copying was successful
-              // then proceed to deleting it from the source bucket
-              s3Client.deleteObject(
-                { Bucket: sourcebucket, Key: sourcekey },
-                function (deleteErr, deleteData) {
-                  if (deleteErr) {
-                    node.status({ fill: "red", shape: "dot", text: `Failure` });
-                    node.error(deleteErr);
-                    // Replace the payload with null
-                    msg.payload = null;
-                    // Append the delete object
-                    // key to the message object
-                    msg.key = key;
-
-                    // Return the complete message object
-                    send(msg);
-                  } else {
-                    // Replace the payload with
-                    // the returned data from the copyObject response
-                    msg.payload = data;
-                    // Append the moved object
-                    // key to the message object
-                    msg.key = key;
-
-                    send(msg);
-                  }
-
-                  node.status({ fill: "green", shape: "dot", text: `Done!` });
-                  // Finalize
-                  if (done) {
-                    s3Client.destroy();
-                    done();
-                  }
-
-                  setTimeout(() => {
-                    node.status({});
-                  }, 3000);
-                }
-              );
-            }
-          }
-        );
-      } catch (err) {
-        // If error occurs
-        node.error(err);
-        // Cleanup
-        if (s3Client !== null) s3Client.destroy();
-        if (done) done();
-
-        node.status({ fill: "red", shape: "dot", text: "Failure" });
-        setTimeout(() => {
-          node.status({});
-        }, 5000);
-      }
-    });
-  }
-
-  RED.nodes.registerType("Move Object", S3MoveObject);
-};
+      // Object move is actually two step process
+      // 1. The object is copied from the specified source bucket to destination bucket with the specified key
+      // 2. Then the source object is removed from the source bucket
+      await s3Client.copyObject({
+        CopySource: encodeURI(n.sourcebucket + "/" + n.sourcekey),
+        Bucket: n.bucket,
+        Key: n.key,
+        ContentEncoding: n.contentencoding,
+      });
+      const result = await s3Client.deleteObject({
+        Bucket: n.sourcebucket,
+        Key: n.sourcekey,
+      });
+      msg.payload = result;
+      // Return the complete message object
+      send(msg);
+      this.status({ fill: "green", shape: "dot", text: "Success" });
+    } catch (err) {
+      // If error occurs
+      this.error(err);
+      this.status({ fill: "red", shape: "dot", text: "Failure" });
+      // Replace the payload with null
+      msg.payload = null;
+      msg.error = err;
+      send(msg);
+    } finally {
+      if(s3Client) s3Client.destroy();
+      /* Dereference vars */
+      s3Client = null;
+      /*********************/
+      setTimeout(() => {
+        this.status({});
+      }, 3000);
+      done();
+    }
+  };
+}
