@@ -129,16 +129,6 @@ function inputHandler(n, RED) {
           text: "No objects uploaded!",
         });
 
-        // Cleanup
-        if (done) {
-          s3Client.destroy();
-          done();
-        }
-
-        setTimeout(() => {
-          this.status({});
-        }, 5000);
-
         return;
       }
 
@@ -174,7 +164,7 @@ function inputHandler(n, RED) {
       msg.error = err;
       send(msg);
     } finally {
-      s3Client.destroy();
+      if(s3Client) s3Client.destroy();
       /* Dereference vars */
       s3Client = null;
       /*********************/
