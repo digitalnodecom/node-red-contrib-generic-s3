@@ -107,7 +107,7 @@ module.exports = function (RED) {
                 text: "Failure",
               });
 
-              node.error(err);
+              node.error(err, msg);
             } else {
               // If the object copying was successful
               // then proceed to deleting it from the source bucket
@@ -153,7 +153,7 @@ module.exports = function (RED) {
         );
       } catch (err) {
         // If error occurs
-        node.error(err);
+        node.error(err, msg);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();

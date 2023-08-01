@@ -176,7 +176,7 @@ module.exports = function (RED) {
         }, 5000);
       } catch (err) {
         // If error occurs
-        node.error(err);
+        node.error(err, msg);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();

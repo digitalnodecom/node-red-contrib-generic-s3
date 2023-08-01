@@ -96,7 +96,7 @@ module.exports = function (RED) {
         s3Client.listObjectVersions(payloadConfig, function (err, data) {
           if (err) {
             node.status({ fill: "red", shape: "dot", text: `Failure` });
-            node.error(err);
+            node.error(err, msg);
             // Replace the payload with null
             msg.payload = null;
             // Append the bucket to
@@ -130,7 +130,7 @@ module.exports = function (RED) {
         });
       } catch (err) {
         // If error occurs
-        node.error(err);
+        node.error(err, msg);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();
