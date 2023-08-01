@@ -1,133 +1,147 @@
-module.exports = function S3ListObjectVersions(RED) {
-  const nodeInstance = instanceNode(RED);
-  RED.nodes.registerType("List Object Versions", nodeInstance);
-};
+module.exports = function (RED) {
+  "use strict";
+  const { S3 } = require("@aws-sdk/client-s3");
 
-function instanceNode(RED) {
-  return function nodeInstance(n) {
+  // List items from single bucket
+  function S3ListObjectVersions(n) {
     RED.nodes.createNode(this, n); // Getting options for the current node
     this.conf = RED.nodes.getNode(n.conf); // Getting configuration
-    let config = this.conf ? this.conf : null; // Cheking if the conf is valid
+    var node = this; // Referencing the current node
+    var config = this.conf ? this.conf : null; // Cheking if the conf is valid
+
     if (!config) {
-      this.warn(RED._("Missing S3 Client Configuration!"));
+      node.warn(RED._("Missing S3 Client Configuration!"));
       return;
     }
-    // Bucket parameter
-    this.bucket = n.bucket != "" ? n.bucket : null;
-    // max-keys parameter
-    this.maxkeys = n.maxkeys != "" ? Number(n.maxkeys) : null;
-    // key-marker parameter
-    this.keymarker = n.keymarker != "" ? n.keymarker : null;
-    // versionID-marker parameter
-    this.versionidmarker = n.versionidmarker != "" ? n.versionidmarker : null;
-    // prefix parameter
-    this.prefix = n.prefix != "" ? n.prefix : null;
-    // Input Handler
-    this.on("input", inputHandler(this, RED));
-  };
-}
 
-function inputHandler(n, RED) {
-  return async function nodeInputHandler(msg, send, done) {
-    const { S3 } = require("@aws-sdk/client-s3");
+    this.on("input", async function (msg, send, done) {
+      /**
+       * Create a payloadConfig object containing parameters to be sent to S3 API
+       * https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html#API_ListObjectsV2_RequestSyntax
+       */
+      let payloadConfig = {};
 
-    // Configuration for client
-    const payloadConfig = {};
-
-    // Bucket parameter
-    if (!n.bucket) {
-      n.bucket = msg.bucket ? msg.bucket : null;
-      if (!n.bucket) {
-        this.error("No bucket provided!");
-        return;
-      }
-    }
-    payloadConfig.Bucket = n.bucket;
-
-    // max-keys parameter
-    if (!n.maxkeys) {
-      n.maxkeys = msg.maxkeys ? msg.maxkeys : null;
-    }
-    if (n.maxkeys) {
-      if (!Number.isInteger(n.maxkeys)) {
-        this.error("The maxkeys should be of type Integer!");
-        return;
-      } else {
-        if (n.maxkeys <= 0) {
-          this.error("The maxkeys properties should be positive number!");
+      // Bucket parameter
+      let bucket = n.bucket != "" ? n.bucket : null;
+      if (!bucket) {
+        bucket = msg.bucket ? msg.bucket : null;
+        if (!bucket) {
+          node.error("No bucket provided!");
           return;
         }
-        payloadConfig.MaxKeys = n.maxkeys;
       }
-    }
+      payloadConfig.Bucket = bucket;
 
-    // marker parameter
-    if (!n.keymarker) {
-      n.keymarker = msg.keymarker ? msg.keymarker : null;
-    }
-    if (n.keymarker) {
-      payloadConfig.KeyMarker = n.keymarker;
-    }
+      // max-keys parameter
+      let maxkeys = n.maxkeys != "" ? Number(n.maxkeys) : null;
+      if (!maxkeys) {
+        maxkeys = msg.maxkeys ? msg.maxkeys : null;
+      }
+      if (maxkeys) {
+        if (!Number.isInteger(maxkeys)) {
+          node.error("The maxkeys should be of type Integer!");
+          return;
+        } else {
+          if (maxkeys <= 0) {
+            node.error("The maxkeys properties should be positive number!");
+            return;
+          }
+          payloadConfig.MaxKeys = maxkeys;
+        }
+      }
 
-    // marker parameter
-    if (!n.versionidmarker) {
-      n.versionidmarker = msg.versionidmarker ? msg.versionidmarker : null;
-    }
-    if (n.versionidmarker) {
-      payloadConfig.VersionIdMarker = n.versionidmarker;
-    }
+      // marker parameter
+      let keymarker = n.keymarker != "" ? n.keymarker : null;
+      if (!keymarker) {
+        keymarker = msg.keymarker ? msg.keymarker : null;
+      }
+      if (keymarker) {
+        payloadConfig.KeyMarker = keymarker;
+      }
 
-    // prefix parameter
-    if (!n.prefix) {
-      n.prefix = msg.prefix ? msg.prefix : null;
-    }
-    if (n.prefix) {
-      payloadConfig.Prefix = n.prefix;
-    }
+      // marker parameter
+      let versionidmarker = n.versionidmarker != "" ? n.versionidmarker : null;
+      if (!versionidmarker) {
+        versionidmarker = msg.versionidmarker ? msg.versionidmarker : null;
+      }
+      if (versionidmarker) {
+        payloadConfig.VersionIdMarker = versionidmarker;
+      }
 
-    // S3 client init
-    let s3Client = null;
-    try {
-      // Creating S3 client
-      s3Client = new S3({
-        endpoint: n.conf.endpoint,
-        forcePathStyle: n.conf.forcepathstyle,
-        region: n.conf.region,
-        credentials: {
-          accessKeyId: n.conf.credentials.accesskeyid,
-          secretAccessKey: n.conf.credentials.secretaccesskey,
-        },
-      });
+      // prefix parameter
+      let prefix = n.prefix != "" ? n.prefix : null;
+      if (!prefix) {
+        prefix = msg.prefix ? msg.prefix : null;
+      }
+      if (prefix) {
+        payloadConfig.Prefix = prefix;
+      }
 
-      this.status({ fill: "blue", shape: "dot", text: "Fetching" });
+      // S3 client init
+      let s3Client = null;
+      try {
+        // Creating S3 client
+        s3Client = new S3({
+          endpoint: config.endpoint,
+          forcePathStyle: config.forcepathstyle,
+          region: config.region,
+          credentials: {
+            accessKeyId: config.credentials.accesskeyid,
+            secretAccessKey: config.credentials.secretaccesskey,
+          },
+        });
 
-      // List all object versions from the desired bucket
-      const result = await s3Client.listObjectVersions(payloadConfig);
-      msg.payload = result;
-      msg.bucket = payloadConfig.Bucket;
-      // Return the complete message object
-      send(msg);
-      this.status({ fill: "green", shape: "dot", text: "Success" });
-    } catch (err) {
-      // If error occurs
-      this.error(err);
-      this.status({ fill: "red", shape: "dot", text: "Failure" });
-      // Replace the payload with null
-      msg.payload = null;
-      msg.error = err;
-      // Append the bucket
-      // to the message object
-      msg.bucket = payloadConfig.Bucket;
-      send(msg);
-    } finally {
-      if(s3Client) s3Client.destroy();
-      /* Dereference vars */
-      s3Client = null;
-      /*********************/
-      setTimeout(() => {
-        this.status({});
-      }, 3000);
-      done();
-    }
-  };
-}
+        node.status({ fill: "blue", shape: "dot", text: "Fetching" });
+        // List all objects from the desired bucket
+        s3Client.listObjectVersions(payloadConfig, function (err, data) {
+          if (err) {
+            node.status({ fill: "red", shape: "dot", text: `Failure` });
+            node.error(err);
+            // Replace the payload with null
+            msg.payload = null;
+            // Append the bucket to
+            // the message object
+            msg.bucket = bucket;
+
+            // Return the complete message object
+            send(msg);
+          } else {
+            // Replace the payload with
+            // the returned data
+            msg.payload = data;
+            // Append the bucket to
+            // the message object
+            msg.bucket = bucket;
+
+            // Return the complete message object
+            send(msg);
+
+            // Finalize
+            if (done) {
+              s3Client.destroy();
+              done();
+            }
+
+            node.status({ fill: "green", shape: "dot", text: "Success" });
+            setTimeout(() => {
+              node.status({});
+            }, 2000);
+          }
+        });
+      } catch (err) {
+        // If error occurs
+        node.error(err);
+        // Cleanup
+        if (s3Client !== null) s3Client.destroy();
+        if (done) done();
+
+        node.status({ fill: "red", shape: "dot", text: "Failure" });
+        setTimeout(() => {
+          node.status({});
+        }, 3000);
+      }
+    });
+  }
+
+  RED.nodes.registerType("List Object Versions", S3ListObjectVersions);
+};
