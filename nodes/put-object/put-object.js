@@ -188,7 +188,7 @@ module.exports = function (RED) {
                         shape: "dot",
                         text: `Failure`,
                       });
-                      node.error(error);
+                      node.error(error, msg);
                       // Replace the payload with null
                       msg.payload = null;
                       // Append the object
@@ -272,7 +272,7 @@ module.exports = function (RED) {
                           shape: "dot",
                           text: `Failure`,
                         });
-                        node.error(error);
+                        node.error(error, msg);
                         // Replace the payload with null
                         msg.payload = null;
                         // Append the object
@@ -317,7 +317,7 @@ module.exports = function (RED) {
             );
           } catch (err) {
             // If error occurs
-            node.error(err);
+            node.error(err, msg);
             // Cleanup
             if (s3Client !== null) s3Client.destroy();
             if (done) done();
@@ -346,7 +346,7 @@ module.exports = function (RED) {
             // If an error occured, print the error
             if (err) {
               node.status({ fill: "red", shape: "dot", text: `Failure` });
-              node.error(err);
+              node.error(err, msg);
               // Replace the payload with null
               msg.payload = null;
               // Append the object
@@ -384,7 +384,7 @@ module.exports = function (RED) {
         }
       } catch (err) {
         // If error occurs
-        node.error(err);
+        node.error(err, msg);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();
