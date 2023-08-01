@@ -122,7 +122,7 @@ function inputHandler(n, RED) {
       msg.bucket = payloadConfig.Bucket;
       send(msg);
     } finally {
-      s3Client.destroy();
+      if(s3Client) s3Client.destroy();
       /* Dereference vars */
       s3Client = null;
       /*********************/
