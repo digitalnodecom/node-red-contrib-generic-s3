@@ -18,10 +18,11 @@ module.exports = function (RED) {
     this.on("input", async function (msg, send, done) {
       let bucket = n.bucket != "" ? n.bucket : null; // Bucket info
       let key = n.key != "" ? n.key : null; // Object key
+      const msgClone = structuredClone(msg);
 
       // Checking for correct properties input
       if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
+        bucket = msgClone.bucket ? msgClone.bucket : null;
         if (!bucket) {
           node.error("No bucket provided!");
           return;
@@ -29,7 +30,7 @@ module.exports = function (RED) {
       }
 
       if (!key) {
-        key = msg.key ? msg.key : null;
+        key = msgClone.key ? msgClone.key : null;
         if (!key) {
           node.error("No object key provided!");
           return;
@@ -56,24 +57,24 @@ module.exports = function (RED) {
           function (err, data) {
             if (err) {
               node.status({ fill: "red", shape: "dot", text: `Failure` });
-              node.error(err, msg);
+              node.error(err, msgClone);
               // Replace the payload with null
-              msg.payload = null;
+              msgClone.payload = null;
               // Append the delete object
               // key to the message object
-              msg.key = key;
+              msgClone.key = key;
 
               // Return the complete message object
-              send(msg);
+              send(msgClone);
             } else {
               // Replace the payload with
               // the returned data
-              msg.payload = data;
+              msgClone.payload = data;
               // Append the deleted object
               // key to the message object
-              msg.key = key;
+              msgClone.key = key;
 
-              send(msg);
+              send(msgClone);
             }
 
             node.status({ fill: "green", shape: "dot", text: `Done!` });
@@ -90,7 +91,7 @@ module.exports = function (RED) {
         );
       } catch (err) {
         // If error occurs
-        node.error(err, msg);
+        node.error(err, msgClone);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();
