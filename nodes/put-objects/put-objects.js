@@ -24,10 +24,11 @@ module.exports = function (RED) {
     this.on("input", async function (msg, send, done) {
       let objects = n.objects != "" ? n.objects : null; // Bucket info
       let upsert = n.upsert ? n.upsert : false; // Upsert flag
+      const msgClone = structuredClone(msg);
 
       // Checking for correct properties input
       if (!objects) {
-        objects = msg.objects ? msg.objects : null;
+        objects = msgClone.objects ? msgClone.objects : null;
 
         if (!isJsonString(objects)) {
           if (!Array.isArray(objects)) {
@@ -50,7 +51,7 @@ module.exports = function (RED) {
       }
 
       if (!upsert) {
-        upsert = msg.upsert ? msg.upsert : false;
+        upsert = msgClone.upsert ? msgClone.upsert : false;
       }
 
       // S3 client init
@@ -112,10 +113,10 @@ module.exports = function (RED) {
 
         if (objectsToPut.length == 0) {
           // Replace the payload with null
-          msg.payload = null;
+          msgClone.payload = null;
 
           // Return the complete message object
-          send(msg);
+          send(msgClone);
 
           node.warn(
             "All of the objects are exactly the same as the already existing ones in the specified bucket!"
@@ -159,10 +160,10 @@ module.exports = function (RED) {
 
         // Replace the payload with
         // the returned data
-        msg.payload = responses;
+        msgClone.payload = responses;
 
         // Return the complete message object
-        send(msg);
+        send(msgClone);
 
         // Finalize
         if (done) {
@@ -176,7 +177,7 @@ module.exports = function (RED) {
         }, 5000);
       } catch (err) {
         // If error occurs
-        node.error(err, msg);
+        node.error(err, msgClone);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();
