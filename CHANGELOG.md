@@ -6,12 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+Added msg object clones for better msg object handling
 
 ## 1.11.5 - 2023-08-01
+Updated node.error so it can be catch with catch node
 
 ## 1.11.4 - 2023-08-01
+Reverted the refactor with await/async
 
 ## 1.11.3 - 2023-08-01
+Refactored nodes with await/async
 
 ## 1.11.2 - 2023-07-24
 Added ACL for Copy Object node

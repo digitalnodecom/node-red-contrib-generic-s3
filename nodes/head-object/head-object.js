@@ -20,11 +20,12 @@ module.exports = function (RED) {
        * https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html#API_ListObjectsV2_RequestSyntax
        */
       let payloadConfig = {};
+      const msgClone = structuredClone(msg);
 
       // Bucket parameter
       let bucket = n.bucket != "" ? n.bucket : null;
       if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
+        bucket = msgClone.bucket ? msgClone.bucket : null;
         if (!bucket) {
           node.error("No bucket provided!");
           return;
@@ -35,7 +36,7 @@ module.exports = function (RED) {
       // marker parameter
       let key = n.key != "" ? n.key : null;
       if (!key) {
-        key = msg.key ? msg.key : null;
+        key = msgClone.key ? msgClone.key : null;
         if (!key) {
           node.error("No object key provided!");
           return;
@@ -46,7 +47,7 @@ module.exports = function (RED) {
       // marker parameter
       let versionid = n.versionid != "" ? n.versionid : null;
       if (!versionid) {
-        versionid = msg.versionid ? msg.versionid : null;
+        versionid = msgClone.versionid ? msgClone.versionid : null;
       }
       if (versionid) {
         payloadConfig.VersionId = versionid;
@@ -71,25 +72,25 @@ module.exports = function (RED) {
         s3Client.headObject(payloadConfig, function (err, data) {
           if (err) {
             node.status({ fill: "red", shape: "dot", text: `Failure` });
-            node.error(err, msg);
+            node.error(err, msgClone);
             // Replace the payload with null
-            msg.payload = null;
+            msgClone.payload = null;
             // Append the object
             // key to the message object
-            msg.key = key;
+            msgClone.key = key;
 
             // Return the complete message object
-            send(msg);
+            send(msgClone);
           } else {
             // Replace the payload with
             // the returned data
-            msg.payload = data;
+            msgClone.payload = data;
             // Append the object
             // key to the message object
-            msg.key = key;
+            msgClone.key = key;
 
             // Return the complete message object
-            send(msg);
+            send(msgClone);
 
             // Finalize
             if (done) {
@@ -105,7 +106,7 @@ module.exports = function (RED) {
         });
       } catch (err) {
         // If error occurs
-        node.error(err, msg);
+        node.error(err, msgClone);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();

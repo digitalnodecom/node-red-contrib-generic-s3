@@ -16,6 +16,7 @@ module.exports = function (RED) {
 
     // Make the handler for the input event async
     this.on("input", async function (msg, send, done) {
+      const msgClone = structuredClone(msg);
       // S3 client init
       let s3Client = null;
       try {
@@ -35,19 +36,19 @@ module.exports = function (RED) {
         s3Client.listBuckets({}, function (err, data) {
           if (err) {
             node.status({ fill: "red", shape: "dot", text: `Failure` });
-            node.error(err, msg);
+            node.error(err, msgClone);
             // Replace the payload with null
-            msg.payload = null;
+            msgClone.payload = null;
 
             // Return the complete message object
-            send(msg);
+            send(msgClone);
           } else {
             // Replace the payload with
             // the returned data
-            msg.payload = data;
+            msgClone.payload = data;
 
             // Return the complete message object
-            send(msg);
+            send(msgClone);
           }
           // Finalizing
           if (done) {
@@ -62,7 +63,7 @@ module.exports = function (RED) {
         });
       } catch (err) {
         // If an error occurs
-        node.error(err, msg);
+        node.error(err, msgClone);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();

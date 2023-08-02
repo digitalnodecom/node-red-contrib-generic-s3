@@ -21,11 +21,12 @@ module.exports = function (RED) {
        * https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html
        */
       let payloadConfig = {};
+      const msgClone = structuredClone(msg);
 
       // Bucket parameter
       let bucket = n.bucket != "" ? n.bucket : null;
       if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
+        bucket = msgClone.bucket ? msgClone.bucket : null;
         if (!bucket) {
           node.error("No bucket provided!");
           return;
@@ -36,7 +37,7 @@ module.exports = function (RED) {
       // key parameter
       let key = n.key != "" ? n.key : null;
       if (!key) {
-        key = msg.key ? msg.key : null;
+        key = msgClone.key ? msgClone.key : null;
         if (!key) {
           node.error("No object key provided!");
           return;
@@ -47,7 +48,7 @@ module.exports = function (RED) {
       // copy source parameter
       let copysource = n.copysource != "" ? n.copysource : null;
       if (!copysource) {
-        copysource = msg.copysource ? msg.copysource : null;
+        copysource = msgClone.copysource ? msgClone.copysource : null;
         if (!copysource) {
           node.error("No Copy Source provided!");
           return;
@@ -57,7 +58,7 @@ module.exports = function (RED) {
       // versionId parameter
       let versionid = n.versionid != "" ? n.versionid : null;
       if (!versionid) {
-        versionid = msg.versionid ? msg.versionid : null;
+        versionid = msgClone.versionid ? msgClone.versionid : null;
       }
 
       if (versionid) {
@@ -71,7 +72,7 @@ module.exports = function (RED) {
       // ContentEncoding parameter
       let contentencoding = n.contentencoding != "" ? n.contentencoding : null;
       if (!contentencoding) {
-        contentencoding = msg.contentencoding ? msg.contentencoding : null;
+        contentencoding = msgClone.contentencoding ? msgClone.contentencoding : null;
       }
       if (contentencoding && !isValidContentEncoding(contentencoding)) {
         node.error("Invalid content encoding!");
@@ -83,7 +84,7 @@ module.exports = function (RED) {
 
       // ACL parameter
       if (!acl) {
-        acl = msg.acl ? msg.acl : null;
+        acl = msgClone.acl ? msgClone.acl : null;
       }
       if (acl && !isValidACL(acl)) {
         node.error("Invalid ACL permissions value");
@@ -111,15 +112,15 @@ module.exports = function (RED) {
         s3Client.copyObject(payloadConfig, function (err, data) {
           if (err) {
             node.status({ fill: "red", shape: "dot", text: `Failure` });
-            node.error(err, msg);
+            node.error(err, msgClone);
             // Replace the payload with null
-            msg.payload = null;
+            msgClone.payload = null;
             // Append the bucket to
             // the message object
-            msg.bucket = bucket;
+            msgClone.bucket = bucket;
 
             // Return the complete message object
-            send(msg);
+            send(msgClone);
 
             setTimeout(() => {
               node.status({});
@@ -127,13 +128,13 @@ module.exports = function (RED) {
           } else {
             // Replace the payload with
             // the returned data
-            msg.payload = data;
+            msgClone.payload = data;
             // Append the bucket to
             // the message object
-            msg.bucket = bucket;
+            msgClone.bucket = bucket;
 
             // Return the complete message object
-            send(msg);
+            send(msgClone);
 
             // Finalize
             if (done) {
@@ -149,7 +150,7 @@ module.exports = function (RED) {
         });
       } catch (err) {
         // If error occurs
-        node.error(err, msg);
+        node.error(err, msgClone);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();

@@ -19,13 +19,13 @@ module.exports = function (RED) {
     this.on("input", async function (msg, send, done) {
       let bucket = n.bucket !== "" ? n.bucket : null; // Destination bucket
       let key = n.key !== "" ? n.key : null; // Destination object key
-
       let sourcekey = n.sourcekey !== "" ? n.sourcekey : null; // Source bucket
       let sourcebucket = n.sourcebucket !== "" ? n.sourcebucket : null; // Source object key
+      const msgClone = structuredClone(msg);
 
       // Checking for correct properties input
       if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
+        bucket = msgClone.bucket ? msgClone.bucket : null;
         if (!bucket) {
           node.error("No bucket provided!");
           return;
@@ -33,7 +33,7 @@ module.exports = function (RED) {
       }
 
       if (!key) {
-        key = msg.key ? msg.key : null;
+        key = msgClone.key ? msgClone.key : null;
         if (!key) {
           node.error("No object key provided!");
           return;
@@ -41,7 +41,7 @@ module.exports = function (RED) {
       }
 
       if (!sourcebucket) {
-        sourcebucket = msg.sourcebucket ? msg.sourcebucket : null;
+        sourcebucket = msgClone.sourcebucket ? msgClone.sourcebucket : null;
         if (!sourcebucket) {
           node.error("No sourcebucket provided!");
           return;
@@ -49,7 +49,7 @@ module.exports = function (RED) {
       }
 
       if (!sourcekey) {
-        sourcekey = msg.sourcekey ? msg.sourcekey : null;
+        sourcekey = msgClone.sourcekey ? msgClone.sourcekey : null;
         if (!sourcekey) {
           node.error("No sourcekey provided!");
           return;
@@ -59,7 +59,7 @@ module.exports = function (RED) {
       // ContentEncoding parameter
       let contentencoding = n.contentencoding != "" ? n.contentencoding : null;
       if (!contentencoding) {
-        contentencoding = msg.contentencoding ? msg.contentencoding : null;
+        contentencoding = msgClone.contentencoding ? msgClone.contentencoding : null;
       }
       if (contentencoding && !isValidContentEncoding(contentencoding)) {
         node.error("Invalid content encoding!");
@@ -107,7 +107,7 @@ module.exports = function (RED) {
                 text: "Failure",
               });
 
-              node.error(err, msg);
+              node.error(err, msgClone);
             } else {
               // If the object copying was successful
               // then proceed to deleting it from the source bucket
@@ -118,22 +118,22 @@ module.exports = function (RED) {
                     node.status({ fill: "red", shape: "dot", text: `Failure` });
                     node.error(deleteErr);
                     // Replace the payload with null
-                    msg.payload = null;
+                    msgClone.payload = null;
                     // Append the delete object
                     // key to the message object
-                    msg.key = key;
+                    msgClone.key = key;
 
                     // Return the complete message object
-                    send(msg);
+                    send(msgClone);
                   } else {
                     // Replace the payload with
                     // the returned data from the copyObject response
-                    msg.payload = data;
+                    msgClone.payload = data;
                     // Append the moved object
                     // key to the message object
-                    msg.key = key;
+                    msgClone.key = key;
 
-                    send(msg);
+                    send(msgClone);
                   }
 
                   node.status({ fill: "green", shape: "dot", text: `Done!` });
@@ -153,7 +153,7 @@ module.exports = function (RED) {
         );
       } catch (err) {
         // If error occurs
-        node.error(err, msg);
+        node.error(err, msgClone);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();
