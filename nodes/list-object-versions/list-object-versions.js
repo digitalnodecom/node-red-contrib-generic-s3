@@ -20,11 +20,12 @@ module.exports = function (RED) {
        * https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html#API_ListObjectsV2_RequestSyntax
        */
       let payloadConfig = {};
+      const msgClone = structuredClone(msg);
 
       // Bucket parameter
       let bucket = n.bucket != "" ? n.bucket : null;
       if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
+        bucket = msgClone.bucket ? msgClone.bucket : null;
         if (!bucket) {
           node.error("No bucket provided!");
           return;
@@ -35,7 +36,7 @@ module.exports = function (RED) {
       // max-keys parameter
       let maxkeys = n.maxkeys != "" ? Number(n.maxkeys) : null;
       if (!maxkeys) {
-        maxkeys = msg.maxkeys ? msg.maxkeys : null;
+        maxkeys = msgClone.maxkeys ? msgClone.maxkeys : null;
       }
       if (maxkeys) {
         if (!Number.isInteger(maxkeys)) {
@@ -53,7 +54,7 @@ module.exports = function (RED) {
       // marker parameter
       let keymarker = n.keymarker != "" ? n.keymarker : null;
       if (!keymarker) {
-        keymarker = msg.keymarker ? msg.keymarker : null;
+        keymarker = msgClone.keymarker ? msgClone.keymarker : null;
       }
       if (keymarker) {
         payloadConfig.KeyMarker = keymarker;
@@ -62,7 +63,7 @@ module.exports = function (RED) {
       // marker parameter
       let versionidmarker = n.versionidmarker != "" ? n.versionidmarker : null;
       if (!versionidmarker) {
-        versionidmarker = msg.versionidmarker ? msg.versionidmarker : null;
+        versionidmarker = msgClone.versionidmarker ? msgClone.versionidmarker : null;
       }
       if (versionidmarker) {
         payloadConfig.VersionIdMarker = versionidmarker;
@@ -71,7 +72,7 @@ module.exports = function (RED) {
       // prefix parameter
       let prefix = n.prefix != "" ? n.prefix : null;
       if (!prefix) {
-        prefix = msg.prefix ? msg.prefix : null;
+        prefix = msgClone.prefix ? msgClone.prefix : null;
       }
       if (prefix) {
         payloadConfig.Prefix = prefix;
@@ -96,25 +97,25 @@ module.exports = function (RED) {
         s3Client.listObjectVersions(payloadConfig, function (err, data) {
           if (err) {
             node.status({ fill: "red", shape: "dot", text: `Failure` });
-            node.error(err, msg);
+            node.error(err, msgClone);
             // Replace the payload with null
-            msg.payload = null;
+            msgClone.payload = null;
             // Append the bucket to
             // the message object
-            msg.bucket = bucket;
+            msgClone.bucket = bucket;
 
             // Return the complete message object
-            send(msg);
+            send(msgClone);
           } else {
             // Replace the payload with
             // the returned data
-            msg.payload = data;
+            msgClone.payload = data;
             // Append the bucket to
             // the message object
-            msg.bucket = bucket;
+            msgClone.bucket = bucket;
 
             // Return the complete message object
-            send(msg);
+            send(msgClone);
 
             // Finalize
             if (done) {
@@ -130,7 +131,7 @@ module.exports = function (RED) {
         });
       } catch (err) {
         // If error occurs
-        node.error(err, msg);
+        node.error(err, msgClone);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();
