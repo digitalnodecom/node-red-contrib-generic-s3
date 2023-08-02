@@ -33,10 +33,11 @@ module.exports = function (RED) {
       let contentType = n.contentType !== "" ? n.contentType : null; // Content-Type of the object
       let upsert = n.upsert ? n.upsert : false; // Upsert flag
       let acl = n.acl && n.acl !== "" ? n.acl : false; // ACL permissions
+      const msgClone = structuredClone(msg);
 
       // Checking for correct properties input
       if (!bucket) {
-        bucket = msg.bucket ? msg.bucket : null;
+        bucket = msgClone.bucket ? msgClone.bucket : null;
         if (!bucket) {
           node.error("No bucket provided!");
           return;
@@ -44,7 +45,7 @@ module.exports = function (RED) {
       }
 
       if (!key) {
-        key = msg.key ? msg.key : null;
+        key = msgClone.key ? msgClone.key : null;
         if (!key) {
           node.error("No object key provided!");
           return;
@@ -52,7 +53,7 @@ module.exports = function (RED) {
       }
 
       if (!body) {
-        body = msg.body ? msg.body : null;
+        body = msgClone.body ? msgClone.body : null;
         if (!body) {
           node.error("No body data provided to put in the object!");
           return;
@@ -60,7 +61,7 @@ module.exports = function (RED) {
       }
 
       if (!stream) {
-        stream = msg.stream ? msg.stream : null;
+        stream = msgClone.stream ? msgClone.stream : null;
       }
 
       // If the body is not a string
@@ -72,7 +73,7 @@ module.exports = function (RED) {
       }
 
       if (!contentType) {
-        contentType = msg.contentType ? msg.contentType : null;
+        contentType = msgClone.contentType ? msgClone.contentType : null;
         if (!contentType) {
           node.error("No Content-Type provided!");
           return;
@@ -80,7 +81,7 @@ module.exports = function (RED) {
       }
 
       if (!metadata) {
-        metadata = msg.metadata ? msg.metadata : null;
+        metadata = msgClone.metadata ? msgClone.metadata : null;
       }
 
       if (metadata) {
@@ -97,13 +98,13 @@ module.exports = function (RED) {
       }
 
       if (!upsert) {
-        upsert = msg.upsert ? msg.upsert : false;
+        upsert = msgClone.upsert ? msgClone.upsert : false;
       }
 
       // ContentEncoding parameter
       let contentencoding = n.contentencoding != "" ? n.contentencoding : null;
       if (!contentencoding) {
-        contentencoding = msg.contentencoding ? msg.contentencoding : null;
+        contentencoding = msgClone.contentencoding ? msgClone.contentencoding : null;
       }
       if (contentencoding && !isValidContentEncoding(contentencoding)) {
         node.error("Invalid content encoding!");
@@ -112,7 +113,7 @@ module.exports = function (RED) {
 
       // ACL parameter
       if(!acl) {
-        acl = msg.acl ? msg.acl : null;
+        acl = msgClone.acl ? msgClone.acl : null;
       }
       if (acl && !isValidACL(acl)) {
         node.error("Invalid ACL permissions value");
@@ -188,27 +189,27 @@ module.exports = function (RED) {
                         shape: "dot",
                         text: `Failure`,
                       });
-                      node.error(error, msg);
+                      node.error(error, msgClone);
                       // Replace the payload with null
-                      msg.payload = null;
+                      msgClone.payload = null;
                       // Append the object
                       // key to the message object
-                      msg.key = key;
+                      msgClone.key = key;
 
                       // Return the complete message object
-                      send(msg);
+                      send(msgClone);
                     } else {
                       // if not, return message with the payload
 
                       // Replace the payload with
                       // the returned data
-                      msg.payload = data;
+                      msgClone.payload = data;
                       // Append the object
                       // key to the message object
-                      msg.key = key;
+                      msgClone.key = key;
 
                       // Return the complete message object
-                      send(msg);
+                      send(msgClone);
 
                       node.status({
                         fill: "green",
@@ -235,13 +236,13 @@ module.exports = function (RED) {
                       `The object ${key} has not been upserted since the body of the existing object is exactly the same`
                     );
                     // Replace the payload with null
-                    msg.payload = null;
+                    msgClone.payload = null;
                     // Append the object
                     // key to the message object
-                    msg.key = key;
+                    msgClone.key = key;
 
                     // Return the complete message object
-                    send(msg);
+                    send(msgClone);
 
                     if (done) done();
                     return;
@@ -272,27 +273,27 @@ module.exports = function (RED) {
                           shape: "dot",
                           text: `Failure`,
                         });
-                        node.error(error, msg);
+                        node.error(error, msgClone);
                         // Replace the payload with null
-                        msg.payload = null;
+                        msgClone.payload = null;
                         // Append the object
                         // key to the message object
-                        msg.key = key;
+                        msgClone.key = key;
 
                         // Return the complete message object
-                        send(msg);
+                        send(msgClone);
                       } else {
                         // if not, return message with the payload
 
                         // Replace the payload with
                         // the returned data
-                        msg.payload = data;
+                        msgClone.payload = data;
                         // Append the object
                         // key to the message object
-                        msg.key = key;
+                        msgClone.key = key;
 
                         // Return the complete message object
-                        send(msg);
+                        send(msgClone);
 
                         node.status({
                           fill: "green",
@@ -317,7 +318,7 @@ module.exports = function (RED) {
             );
           } catch (err) {
             // If error occurs
-            node.error(err, msg);
+            node.error(err, msgClone);
             // Cleanup
             if (s3Client !== null) s3Client.destroy();
             if (done) done();
@@ -346,27 +347,27 @@ module.exports = function (RED) {
             // If an error occured, print the error
             if (err) {
               node.status({ fill: "red", shape: "dot", text: `Failure` });
-              node.error(err, msg);
+              node.error(err, msgClone);
               // Replace the payload with null
-              msg.payload = null;
+              msgClone.payload = null;
               // Append the object
               // key to the message object
-              msg.key = key;
+              msgClone.key = key;
 
               // Return the complete message object
-              send(msg);
+              send(msgClone);
             } else {
               // if not, return message with the payload
 
               // Replace the payload with
               // the returned data
-              msg.payload = data;
+              msgClone.payload = data;
               // Append the object
               // key to the message object
-              msg.key = key;
+              msgClone.key = key;
 
               // Return the complete message object
-              send(msg);
+              send(msgClone);
 
               node.status({ fill: "green", shape: "dot", text: `Success` });
             }
@@ -384,7 +385,7 @@ module.exports = function (RED) {
         }
       } catch (err) {
         // If error occurs
-        node.error(err, msg);
+        node.error(err, msgClone);
         // Cleanup
         if (s3Client !== null) s3Client.destroy();
         if (done) done();
