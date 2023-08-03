@@ -102,7 +102,7 @@ function inputHandler(n, RED) {
       this.status({
         fill: "blue",
         shape: "dot",
-        text: "Copying...",
+        text: "Moving...",
       });
 
       // Object move is actually two step process
