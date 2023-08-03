@@ -1,108 +1,95 @@
-module.exports = function (RED) {
-  "use strict";
-  const { S3 } = require("@aws-sdk/client-s3");
+module.exports = function S3DeleteObject(RED) {
+  const nodeInstance = instanceNode(RED);
+  RED.nodes.registerType("Delete Object", nodeInstance);
+};
 
-  // Delete object
-  function S3DeleteObject(n) {
+function instanceNode(RED) {
+  return function nodeInstance(n) {
     RED.nodes.createNode(this, n); // Getting options for the current node
     this.conf = RED.nodes.getNode(n.conf); // Getting configuration
-    var node = this; // Referencing the current node
-    var config = this.conf ? this.conf : null; // Cheking if the conf is valid
-
-    // If there is no conifg
+    let config = this.conf ? this.conf : null; // Cheking if the conf is valid
     if (!config) {
-      node.warn(RED._("Missing S3 Client Configuration!"));
+      this.warn(RED._("Missing S3 Client Configuration!"));
       return;
     }
+    // Bucket parameter
+    this.bucket = n.bucket != "" ? n.bucket : null;
+    // Key parameter
+    this.key = n.key != "" ? n.key : null;
+    // Input Handler
+    this.on("input", inputHandler(this, RED));
+  };
+}
 
-    this.on("input", async function (msg, send, done) {
-      let bucket = n.bucket != "" ? n.bucket : null; // Bucket info
-      let key = n.key != "" ? n.key : null; // Object key
-      const msgClone = structuredClone(msg);
+function inputHandler(n, RED) {
+  return async function nodeInputHandler(msg, send, done) {
+    const { S3 } = require("@aws-sdk/client-s3");
+    // msg object clone
+    const msgClone = structuredClone(msg);
 
-      // Checking for correct properties input
+    // Bucket parameter
+    let bucket = n.bucket != "" ? n.bucket : null;
+    if (!bucket) {
+      bucket = msgClone.bucket ? msgClone.bucket : null;
       if (!bucket) {
-        bucket = msgClone.bucket ? msgClone.bucket : null;
-        if (!bucket) {
-          node.error("No bucket provided!");
-          return;
-        }
+        this.error("No bucket provided!");
+        return;
       }
+    }
 
+    // Key parameter
+    let key = n.key != "" ? n.key : null;
+    if (!key) {
+      key = msgClone.key ? msgClone.key : null;
       if (!key) {
-        key = msgClone.key ? msgClone.key : null;
-        if (!key) {
-          node.error("No object key provided!");
-          return;
-        }
+        this.error("No object key provided!");
+        return;
       }
+    }
 
-      // S3 client init
-      let s3Client = null;
-      try {
-        // Creating S3 client
-        s3Client = new S3({
-          endpoint: config.endpoint,
-          forcePathStyle: config.forcepathstyle,
-          region: config.region,
-          credentials: {
-            accessKeyId: config.credentials.accesskeyid,
-            secretAccessKey: config.credentials.secretaccesskey,
-          },
-        });
+    // S3 client init
+    let s3Client = null;
+    try {
+      // Creating S3 client
+      s3Client = new S3({
+        endpoint: n.conf.endpoint,
+        forcePathStyle: n.conf.forcepathstyle,
+        region: n.conf.region,
+        credentials: {
+          accessKeyId: n.conf.credentials.accesskeyid,
+          secretAccessKey: n.conf.credentials.secretaccesskey,
+        },
+      });
 
-        node.status({ fill: "blue", shape: "dot", text: "Deleting" });
-        s3Client.deleteObject(
-          { Bucket: bucket, Key: key },
-          function (err, data) {
-            if (err) {
-              node.status({ fill: "red", shape: "dot", text: `Failure` });
-              node.error(err, msgClone);
-              // Replace the payload with null
-              msgClone.payload = null;
-              // Append the delete object
-              // key to the message object
-              msgClone.key = key;
-
-              // Return the complete message object
-              send(msgClone);
-            } else {
-              // Replace the payload with
-              // the returned data
-              msgClone.payload = data;
-              // Append the deleted object
-              // key to the message object
-              msgClone.key = key;
-
-              send(msgClone);
-            }
-
-            node.status({ fill: "green", shape: "dot", text: `Done!` });
-            // Finalize
-            if (done) {
-              s3Client.destroy();
-              done();
-            }
-
-            setTimeout(() => {
-              node.status({});
-            }, 3000);
-          }
-        );
-      } catch (err) {
-        // If error occurs
-        node.error(err, msgClone);
-        // Cleanup
-        if (s3Client !== null) s3Client.destroy();
-        if (done) done();
-
-        node.status({ fill: "red", shape: "dot", text: "Failure" });
-        setTimeout(() => {
-          node.status({});
-        }, 5000);
-      }
-    });
-  }
-
-  RED.nodes.registerType("Delete Object", S3DeleteObject);
-};
+      this.status({ fill: "blue", shape: "dot", text: "Deleting" });
+      const result = await s3Client.deleteObject({
+        Bucket: bucket,
+        Key: key,
+      });
+      // Replace the payload with
+      // the returned data
+      msgClone.payload = result;
+      // Append the deleted object
+      // key to the message object
+      msgClone.key = key;
+      send(msgClone);
+    } catch (err) {
+      // If error occurs
+      msgClone.error = err;
+      msgClone.payload = null;
+      msgClone.key = key;
+      this.error(err, msgClone);
+      send(msg);
+      this.status({ fill: "red", shape: "dot", text: "Failure" });
+    } finally {
+      if (s3Client) s3Client.destroy();
+      /* Dereference vars */
+      s3Client = null;
+      /*********************/
+      setTimeout(() => {
+        this.status({});
+      }, 3000);
+      done();
+    }
+  };
+}

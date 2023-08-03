@@ -2,6 +2,8 @@
 
 <img src="icons/s3Logo.png" alt="drawing" width="150"/>
 
+## IMPORTANT!
+### Please do not update to version 1.12.0 without previously througly testing it, since it may require some logic changes in your whole flow.
 
 ### These node-red nodes are meant to work with any S3 provider while making the workflow easier to follow
 
