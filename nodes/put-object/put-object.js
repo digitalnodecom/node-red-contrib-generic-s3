@@ -50,7 +50,14 @@ function inputHandler(n, RED) {
     const crypto = require("crypto");
 
     // msg object clone
-    const msgClone = structuredClone(msg);
+    let msgClone;
+    try {
+      msgClone = structuredClone(msg);
+    } catch (e) {
+      msg.error = e;
+      this.error(e, e);
+      return;
+    }
 
     let bucket = n.bucket ? n.bucket : null;
     // Checking for correct properties input
