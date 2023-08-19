@@ -36,7 +36,14 @@ function inputHandler(n, RED) {
     const { bufferToString, streamToBuffer } = require("../../common/common");
 
     // msg object clone
-    const msgClone = structuredClone(msg);
+    let msgClone;
+    try {
+      msgClone = structuredClone(msg);
+    } catch (e) {
+      msg.error = e;
+      this.error(e, e);
+      return;
+    }
 
     // Configuration for client
     const payloadConfig = {};
