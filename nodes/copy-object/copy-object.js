@@ -39,7 +39,14 @@ function inputHandler(n, RED) {
     } = require("../../common/common");
 
     // msg object clone
-    const msgClone = structuredClone(msg);
+    let msgClone;
+    try {
+      msgClone = structuredClone(msg);
+    } catch (e) {
+      msg.error = e;
+      this.error(e, e);
+      return;
+    }
 
     /**
      * Create a payloadConfig object containing parameters to be sent to S3 API

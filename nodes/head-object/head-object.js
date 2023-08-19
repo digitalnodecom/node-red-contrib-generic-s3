@@ -27,9 +27,16 @@ function inputHandler(n, RED) {
   return async function nodeInputHandler(msg, send, done) {
     // Imports
     const { S3 } = require("@aws-sdk/client-s3");
-    // msg object clone
-    const msgClone = structuredClone(msg);
 
+    // msg object clone
+    let msgClone;
+    try {
+      msgClone = structuredClone(msg);
+    } catch (e) {
+      msg.error = e;
+      this.error(e, e);
+      return;
+    }
     // Configuration for client
     const payloadConfig = {};
 

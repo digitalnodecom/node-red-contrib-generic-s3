@@ -22,8 +22,16 @@ function instanceNode(RED) {
 function inputHandler(n, RED) {
   return async function nodeInputHandler(msg, send, done) {
     const { S3 } = require("@aws-sdk/client-s3");
+
     // msg object clone
-    const msgClone = structuredClone(msg);
+    let msgClone;
+    try {
+      msgClone = structuredClone(msg);
+    } catch (e) {
+      msg.error = e;
+      this.error(e, e);
+      return;
+    }
 
     // Checking for correct properties input
     let bucket = n.bucket != "" ? n.bucket : null;
