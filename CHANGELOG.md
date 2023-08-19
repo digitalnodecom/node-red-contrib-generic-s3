@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 1.12.2 - 2023-08-19
+
 ## 1.12.1 - 2023-08-05
 Added warning in README for `structuredClone` undefined exception crashing node-RED
 
