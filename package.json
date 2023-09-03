@@ -37,8 +37,7 @@
     "generic"
   ],
   "scripts": {
-    "test": "echo \"No test specified\"",
-    "watch": "nodemon -e js,html,json --watch . -x \"rm -r /Users/$USER/.node-red/node_modules/@digitalnodecom/${PWD##*/} && npm install --prefix /Users/$USER/.node-red --save ./ --force && node-red\""
+    "test": "echo \"No test specified\""
   },
   "engines": {
     "node": ">=17.0.0"
