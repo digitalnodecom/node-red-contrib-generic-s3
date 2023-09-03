@@ -36,8 +36,8 @@
 </script>
 
 <script type="text/x-red" data-help-name="Object Exists">
-    <p>S3 head object node. This node is used to get object metadata
-    from the specified bucket using the configured client while not fetching the object itself.
+    <p>S3 object exists node. This node is used to check if an object exists, and if it does, return it's metadata using headObject.
+    If the object does not exist the returned payload is false.
     The bucket name and the object key can be specified in the properties of the node or
     by setting input properties <code>msg.bucket</code>
     and(or) <code>msg.key</code> respectively. Version ID is optional and it can be set
