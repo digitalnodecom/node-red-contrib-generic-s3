@@ -17,7 +17,8 @@
       "put-objects": "./nodes/put-objects/put-objects.js",
       "delete-object": "./nodes/delete-object/delete-object.js",
       "copy-object": "./nodes/copy-object/copy-object.js",
-      "move-object": "./nodes/move-object/move-object.js"
+      "move-object": "./nodes/move-object/move-object.js",
+      "object-exists": "./nodes/object-exists/object-exists.js"
     }
   },
   "repository": {
@@ -36,7 +37,8 @@
     "generic"
   ],
   "scripts": {
-    "test": "echo \"No test specified\""
+    "test": "echo \"No test specified\"",
+    "watch": "nodemon -e js,html,json --watch . -x \"rm -r /Users/$USER/.node-red/node_modules/@digitalnodecom/${PWD##*/} && npm install --prefix /Users/$USER/.node-red --save ./ --force && node-red\""
   },
   "engines": {
     "node": ">=17.0.0"
