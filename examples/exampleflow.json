@@ -1,6 +1,6 @@
 [
     {
-        "id": "68c732176a3f581e",
+        "id": "e9879494ea6c76be",
         "type": "tab",
         "label": "Generic S3 Node examples",
         "disabled": false,
@@ -8,9 +8,9 @@
         "env": []
     },
     {
-        "id": "d5e4f231b124e012",
+        "id": "2d52a6a2ac9ef859",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -28,14 +28,14 @@
         "y": 200,
         "wires": [
             [
-                "e1b353d1472216f7"
+                "2d4eaf584bb678db"
             ]
         ]
     },
     {
-        "id": "7dfb6197f997a6e1",
+        "id": "745a61645096f8eb",
         "type": "debug",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Debug",
         "active": true,
         "tosidebar": true,
@@ -50,23 +50,23 @@
         "wires": []
     },
     {
-        "id": "e1b353d1472216f7",
+        "id": "2d4eaf584bb678db",
         "type": "List Buckets",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "conf": "",
         "name": "",
         "x": 530,
         "y": 200,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "ed12bcdae903256f",
+        "id": "66076889d2c3e634",
         "type": "List Objects",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "conf": "",
         "bucket": "test-node-bucket",
@@ -77,14 +77,14 @@
         "y": 240,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "2f02572ef0ab2285",
+        "id": "3f42b760821f8a88",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -102,14 +102,14 @@
         "y": 240,
         "wires": [
             [
-                "b6118fb26c4fa65a"
+                "d2d2e1be0b4e02ec"
             ]
         ]
     },
     {
-        "id": "671ef02142041653",
+        "id": "58913bb5210b8dac",
         "type": "Get Object",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "conf": "",
         "bucket": "",
@@ -120,14 +120,14 @@
         "y": 360,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "9c8cc7e30a4abdd7",
+        "id": "3bf4a4911e99e716",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -145,14 +145,14 @@
         "y": 360,
         "wires": [
             [
-                "a726810b2e772ea1"
+                "4831e513f41fb839"
             ]
         ]
     },
     {
-        "id": "5b4a9f0be67ae483",
+        "id": "5b7645d520e2ef9f",
         "type": "Put Object",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "conf": "",
         "bucket": "",
@@ -161,17 +161,17 @@
         "body": "",
         "upsert": false,
         "x": 530,
-        "y": 480,
+        "y": 520,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "bc7d60351cf31a5c",
+        "id": "b2597be04818837c",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -186,17 +186,17 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 480,
+        "y": 520,
         "wires": [
             [
-                "71615eb95df1b24a"
+                "3611a87f3321bf15"
             ]
         ]
     },
     {
-        "id": "71615eb95df1b24a",
+        "id": "3611a87f3321bf15",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// File contents, in this example object that is later stringified in json\nconst testJson = {\n    \"Data\": {\n        \"Exists\": true,\n        \"Testing\": \"Dummy data\"\n    },\n    \"Something\": \"Other dummy data\",\n    \"Changes\": true\n}\n\n// Parameters that are later passed to create the object\nconst objectToCreate = {\n    Bucket: 'test-node-bucket',\n    Key: 'TestFile.json',\n    ContentType: 'application/json',\n    Body: JSON.stringify(testJson),\n    Metadata: {\n        \"test\": \"Test MetaData\"\n    }\n}\n\n// Bucket in which the object is going to be created\nmsg.bucket = objectToCreate.Bucket;\n// Object's unique identifier\nmsg.key = objectToCreate.Key;\n// Content type of the object\nmsg.contentType = objectToCreate.ContentType;\n// Object body\nmsg.body = objectToCreate.Body;\n// Is stream flag for the body. Please refer to the docs for how to streamify the body\nmsg.stream = false;\n// Metadata for the object\nmsg.metadata = objectToCreate.Metadata;\n// Upsert flag for the node\nmsg.upsert = true;\n\nreturn msg;",
         "outputs": 1,
@@ -205,33 +205,33 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 480,
+        "y": 520,
         "wires": [
             [
-                "5b4a9f0be67ae483"
+                "5b7645d520e2ef9f"
             ]
         ]
     },
     {
-        "id": "143c257ec47c59f6",
+        "id": "45a72dcdaf3ebb7e",
         "type": "Delete Object",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "conf": "",
         "bucket": "",
         "key": "",
         "x": 520,
-        "y": 560,
+        "y": 600,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "bfee40243acf3d81",
+        "id": "b3926b1a44680b23",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -246,17 +246,17 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 560,
+        "y": 600,
         "wires": [
             [
-                "0eeb127a520e4e52"
+                "a76a2d6ae75efd1d"
             ]
         ]
     },
     {
-        "id": "0eeb127a520e4e52",
+        "id": "a76a2d6ae75efd1d",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified for the object that you want to delete\nmsg.key = 'TestFile.json';\n\nreturn msg;",
         "outputs": 1,
@@ -265,32 +265,32 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 560,
+        "y": 600,
         "wires": [
             [
-                "143c257ec47c59f6"
+                "45a72dcdaf3ebb7e"
             ]
         ]
     },
     {
-        "id": "aa8df3263eb9b4bc",
+        "id": "b5aa2281e4a471dd",
         "type": "Create Bucket",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "conf": "",
         "bucket": "",
         "x": 520,
-        "y": 440,
+        "y": 480,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "b9c958a11510dbde",
+        "id": "31a9e7ca10acdd14",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -305,17 +305,17 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 440,
+        "y": 480,
         "wires": [
             [
-                "bd77c3bdc0d44f19"
+                "63df220efc44eecf"
             ]
         ]
     },
     {
-        "id": "b6118fb26c4fa65a",
+        "id": "d2d2e1be0b4e02ec",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// Name of the bucket from which you want to list the objects\nmsg.bucket = 'test-node-bucket';\n// Max keys (unsigned integer) that the request will list\nmsg.maxkeys = 200;\n// Marker from which object should the listing begin\nmsg.marker = \"example.json\";\n// Prefix to list objects that contain the specified prefix\nmsg.prefix = \"exmp\";\n\nreturn msg;",
         "outputs": 1,
@@ -327,14 +327,14 @@
         "y": 240,
         "wires": [
             [
-                "ed12bcdae903256f"
+                "66076889d2c3e634"
             ]
         ]
     },
     {
-        "id": "a726810b2e772ea1",
+        "id": "4831e513f41fb839",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n// Object's specific version ID\nmsg.versionid = 't46ZenlYTZBnj'\n// Flag which specifies wether the body should be stringified or not\nmsg.stringifybody = true;\n// Flag which specifies wether the body should be stringified with base64 encoding or not (for binary objects in body)\nmsg.stringifybody = true;\nreturn msg;",
         "outputs": 1,
@@ -346,14 +346,14 @@
         "y": 360,
         "wires": [
             [
-                "671ef02142041653"
+                "58913bb5210b8dac"
             ]
         ]
     },
     {
-        "id": "bd77c3bdc0d44f19",
+        "id": "63df220efc44eecf",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// Name of the bucket that you want to create\nmsg.bucket = 'test-node-bucket';\n\nreturn msg;",
         "outputs": 1,
@@ -362,17 +362,17 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 440,
+        "y": 480,
         "wires": [
             [
-                "aa8df3263eb9b4bc"
+                "b5aa2281e4a471dd"
             ]
         ]
     },
     {
-        "id": "82cab034e61ab05d",
+        "id": "5e0dfe913f100806",
         "type": "comment",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "README",
         "info": "In order for this to work, first you will need to configure S3 client with the defined properties which are used by the nodes\n\nYou can access this configuration node anytime by going into the configuration nodes, under `client-s3 `\n\nNotice that there is List Objects and List Objects V2 nodes. We recommed using List Objects V2 since List Objects is depracted and will be removed with the next major release.",
         "x": 120,
@@ -380,9 +380,9 @@
         "wires": []
     },
     {
-        "id": "bb8495befd450a47",
+        "id": "f84a4f3671f1bfb5",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -397,17 +397,17 @@
         "payload": "",
         "payloadType": "date",
         "x": 130,
-        "y": 520,
+        "y": 560,
         "wires": [
             [
-                "ce7ea9412e44e5d0"
+                "7bcf32427d7f37f5"
             ]
         ]
     },
     {
-        "id": "ce7ea9412e44e5d0",
+        "id": "7bcf32427d7f37f5",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// Test Json that is the body of the objects\nconst testJson = {\n    \"Data\": {\n        \"Exists\": true,\n        \"Testing\": \"Dummy data\"\n    },\n    \"Something\": \"Other dummy data\",\n    \"Changes\": true,\n    \"Counter\": 0\n}\n\n// Creating an array of objects that are going to be inserted\nlet objects = [];\nfor (let i = 0; i < 100; i++) {\n\n    // Tweaking the body of the object\n    testJson.Counter = i;\n    let newObj = {};\n\n    // Creating the object\n    newObj = {\n        key: `${i}_${i * 100}.json`,\n        contentType: \"application/json\",\n        body: JSON.stringify(testJson),\n        bucket: 'testing-node-bucket',\n    };\n\n    // Putting all the objects in an array because the Put Objects node as input takes an array \n    objects.push(newObj);\n}\n\n// Objects array\nmsg.objects = objects;\n// Upsert flag for the node\nmsg.upsert = false;\n\nreturn msg;",
         "outputs": 1,
@@ -416,33 +416,33 @@
         "finalize": "",
         "libs": [],
         "x": 290,
-        "y": 520,
+        "y": 560,
         "wires": [
             [
-                "652b388bb2f2e393"
+                "b772cff6fdbbbaa9"
             ]
         ]
     },
     {
-        "id": "652b388bb2f2e393",
+        "id": "b772cff6fdbbbaa9",
         "type": "Put Objects",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "conf": "",
         "objects": "",
         "upsert": false,
         "x": 530,
-        "y": 520,
+        "y": 560,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "2c2465918958cf88",
+        "id": "0ef62e6384f0ab4b",
         "type": "List Objects V2",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "conf": "",
         "bucket": "",
@@ -453,14 +453,14 @@
         "y": 280,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "aa9f7aa127edd3e1",
+        "id": "e2f01d1d697e602c",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// Name of the bucket from which you want to list the objects\nmsg.bucket = 'test-node-bucket';\n// Max keys (unsigned integer) that the request will list\nmsg.maxkeys = 200;\n// Marker from which object should the listing begin\nmsg.startafter = \"example.json\";\n// Prefix to list objects that contain the specified prefix\nmsg.prefix = \"exmp\";\n// Continuation token which indicates where this listing should be continued from\nmsg.continuationtoken = \"eyJuZXh0S2V5TWFya2VyIjogIjI3XzI3MDAuanNvbiIsICJuZXh0UHJlZml4TWFya2VyIjogIiJ9\";\n\nreturn msg;",
         "outputs": 1,
@@ -472,14 +472,14 @@
         "y": 280,
         "wires": [
             [
-                "2c2465918958cf88"
+                "0ef62e6384f0ab4b"
             ]
         ]
     },
     {
-        "id": "5812f826950b7906",
+        "id": "59900fcaac6f3e25",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -497,14 +497,14 @@
         "y": 280,
         "wires": [
             [
-                "aa9f7aa127edd3e1"
+                "e2f01d1d697e602c"
             ]
         ]
     },
     {
-        "id": "793dbb55a559ac55",
+        "id": "5dc867e2ac847b1f",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -522,14 +522,14 @@
         "y": 320,
         "wires": [
             [
-                "32117dc38e7426a6"
+                "b56a6af5464bd6fa"
             ]
         ]
     },
     {
-        "id": "32117dc38e7426a6",
+        "id": "b56a6af5464bd6fa",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// Name of the bucket from which you want to list the object(s) versions\nmsg.bucket = 'test-node-bucket';\n// Maximum amount of keys (unsigned integer) that the request will list\nmsg.maxkeys = 200;\n// Marker from which object(s) versions should the listing begin\nmsg.keymarker = \"example.json\";\n// Version from which object(s) versions should the listing begin\nmsg.versionidmarker = \"t46ZenlYTZBnj\";\n// Prefix to list object(s) versions that contain the specified prefix\nmsg.prefix = \"exmp\";\n\nreturn msg;",
         "outputs": 1,
@@ -541,27 +541,27 @@
         "y": 320,
         "wires": [
             [
-                "592fe00aaba80034"
+                "04885fb3439a5750"
             ]
         ]
     },
     {
-        "id": "592fe00aaba80034",
+        "id": "04885fb3439a5750",
         "type": "List Object Versions",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "x": 500,
         "y": 320,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "c6d4de2862c919c6",
+        "id": "3262e1f57b9f35aa",
         "type": "Head Object",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "",
         "conf": "",
         "bucket": "",
@@ -571,14 +571,14 @@
         "y": 400,
         "wires": [
             [
-                "7dfb6197f997a6e1"
+                "745a61645096f8eb"
             ]
         ]
     },
     {
-        "id": "2eb2319ddb6518a6",
+        "id": "3838fcb2ce8a5462",
         "type": "function",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "Parameters",
         "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n// Object's specific version ID\nmsg.versionid = 't46ZenlYTZBnj'\n\nreturn msg;",
         "outputs": 1,
@@ -590,14 +590,14 @@
         "y": 400,
         "wires": [
             [
-                "c6d4de2862c919c6"
+                "3262e1f57b9f35aa"
             ]
         ]
     },
     {
-        "id": "f0d76f83f174e6dc",
+        "id": "87d733934b75f67b",
         "type": "inject",
-        "z": "68c732176a3f581e",
+        "z": "e9879494ea6c76be",
         "name": "inject",
         "props": [
             {
@@ -615,7 +615,68 @@
         "y": 400,
         "wires": [
             [
-                "2eb2319ddb6518a6"
+                "3838fcb2ce8a5462"
+            ]
+        ]
+    },
+    {
+        "id": "ef6f2ad9a11b989f",
+        "type": "Object Exists",
+        "z": "e9879494ea6c76be",
+        "name": "",
+        "conf": "",
+        "bucket": "",
+        "key": "",
+        "versionid": "",
+        "x": 530,
+        "y": 440,
+        "wires": [
+            [
+                "745a61645096f8eb"
+            ]
+        ]
+    },
+    {
+        "id": "f99bc3f23755448d",
+        "type": "function",
+        "z": "e9879494ea6c76be",
+        "name": "Parameters",
+        "func": "// Name of the bucket in which the object is located\nmsg.bucket = 'test-node-bucket';\n// Unique key with which the object is identified\nmsg.key = 'TestFile.json';\n// Object's specific version ID\nmsg.versionid = 't46ZenlYTZBnj'\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 440,
+        "wires": [
+            [
+                "ef6f2ad9a11b989f"
+            ]
+        ]
+    },
+    {
+        "id": "c89b489e21dbb312",
+        "type": "inject",
+        "z": "e9879494ea6c76be",
+        "name": "inject",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 440,
+        "wires": [
+            [
+                "f99bc3f23755448d"
             ]
         ]
     }
