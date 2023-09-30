@@ -1,10 +1,16 @@
 # node-red-contrib-generic-s3
 
-<img src="icons/s3Logo.png" alt="drawing" width="150"/>
+<img src="icons/s3Logo.png" alt="s3Logo" width="150"/>
 
 ## IMPORTANT!!!
 ## `VERSION 1.12.x REQUIRES NODE.JS 17.x OR LATER. PLEASE DO NOT UPDATE UNLESS THIS REQUIREMENT IS MET SINCE THESE NODES WILL PRODUCE EXCEPTION THAT WILL CRASH NODE-RED`
 ### Also please do not update to version 1.12.x without previously througly testing it, since it may require some logic changes in your whole flow.
+
+#### To run development mode, make sure that your 1880 port is free, or specify another port in `watch` script, and then just run from the root of the project
+```bash
+npm run dev
+```
+
 
 ### These node-red nodes are meant to work with any S3 provider while making the workflow easier to follow
 
