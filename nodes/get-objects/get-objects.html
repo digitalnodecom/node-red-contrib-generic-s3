@@ -1,0 +1,54 @@
+
+<!-- BEGIN GET OBJECTS -->
+<script type="text/x-red" data-template-name="Get Objects">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="Name">&nbsp;</span>Name: </label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-conf"><code><i class="fa fa-cogs"></i></code> <span data-i18n="Configuration">&nbsp;</span>Client: </label>
+        <input type="text" id="node-input-conf">
+    </div>
+    <div class="form-row">
+        <label for="node-input-objects"><code><i class="fa fa-pencil-square-o"></i></code> <span data-i18n="Objects">&nbsp;</span>Objects: </label>
+        <input type="text" id="node-input-objects" data-i18n="[placeholder][{JSON}, {JSON}, ...]">
+    </div>
+    <div class="form-tips">
+        <span>Tips:</span>
+        <ul>
+            <li><span data-i18n="[html]tip1">If you are setting Objects using this node, make sure it is in valid, format as specified in the placeholder. The objects field needs to be an array of objects. Leave <code>Objects</code> field blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+                <ul>
+                    <li><code>msg.objects = [{</br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bucket: "test-bucket", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; key: "unique-object-key.json", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; versionid(optional): "t46ZenlYTZBnj", </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; stringifybody(optional): true | false, </br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; stringifybodybase64(optional): true | false </br>&nbsp; }]</code></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Get Objects">
+    <p>S3 get objects node. This node is used to get objects contents and
+    metadata from the specified bucket using the configured client. The bucket
+    name and the object keys can be specified in the properties of the node or
+    by setting input properties <code>msg.bucket</code>
+    and(or) <code>msg.keys</code> respectively</p> Version ID and Stringify Body as well as Stringify Body base64 encoding are optional and can be set
+    from the node or by setting input properties <code>msg.version</code>, <code>msg.stringifybody</code>, <code>msg.stringifybodybase64</code></p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('Get Objects',{
+        category: 'storage-input',
+        color:"#FFFFFF",
+        defaults: {
+            name: {value: ""},
+            conf: {type:"client-s3", required:true},
+            objects: {type: 'text', required: false}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "s3Logo.png",
+        label: function() {
+            return this.name ? this.name : "Get Objects";
+        }
+    });
+</script>
+<!-- END GET OBJECTs -->
