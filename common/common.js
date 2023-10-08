@@ -15,6 +15,10 @@ const isObject = (obj) => {
   return Object.prototype.toString.call(obj) === "[object Object]";
 };
 
+const isArray = (arr) => {
+  return Array.isArray(arr);
+}
+
 // Check if value string
 const isString = (value) => {
   return typeof value === "string" || value instanceof String;
@@ -113,6 +117,28 @@ const createS3formatInputObjectArray = (arr) => {
   return s3Array;
 };
 
+// Create S3 client format object array for fetching multiple objects
+const createS3formatGetObjects = (arr) => {
+  if(!isArray(arr)) {
+    throw ("The input is not an array!");
+  }
+  let s3Array = [];
+  arr.forEach((element) => {
+    s3Array.push({
+      payload: {
+        Bucket: element.bucket,
+        Key: element.key,
+        VersionId: element.versionid,
+      },
+      flags: {
+        stringifybody: element.stringifybody ? element.stringifybody : false,
+        stringifybodybase64: element.stringifybodybase64 ? element.stringifybodybase64 : false,
+      }
+    });
+  });
+  return s3Array;
+}
+
 const isValidContentEncoding = (contentEncoding) => {
   // Define the valid contentEncoding values
   const validEncodings = ["gzip", "deflate", "br", "compress", "identity"];
@@ -141,6 +167,8 @@ module.exports = {
   isJsonString,
   isObject,
   isString,
+  isArray,
+  createS3formatGetObjects,
   streamToString,
   streamToBuffer,
   streamToStringbase64,
