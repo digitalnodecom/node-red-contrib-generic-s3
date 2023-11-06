@@ -22,6 +22,8 @@ function instanceNode(RED) {
     this.sourcebucket = n.sourcebucket !== "" ? n.sourcebucket : null;
     // ContentEncoding parameter
     this.contentencoding = n.contentencoding != "" ? n.contentencoding : null;
+    // ACL parameter
+    this.acl = n.acl != "" ? n.acl : null;
     // Input Handler
     this.on("input", inputHandler(this, RED));
   };
@@ -31,7 +33,10 @@ function inputHandler(n, RED) {
   return async function nodeInputHandler(msg, send, done) {
     // Imports
     const { S3 } = require("@aws-sdk/client-s3");
-    const { isValidContentEncoding } = require("../../common/common");
+    const {
+      isValidContentEncoding,
+      isValidACL,
+    } = require("../../common/common");
 
     // msg object clone
     let msgClone;
@@ -91,6 +96,16 @@ function inputHandler(n, RED) {
       return;
     }
 
+    // ACL parameter
+    let acl = n.acl ? n.acl : null;
+    if (!acl) {
+      acl = msgClone.acl ? msgClone.acl : null;
+    }
+    if (acl && !isValidACL(acl)) {
+      this.error("Invalid ACL permissions value");
+      return;
+    }
+
     // S3 client init
     let s3Client = null;
     try {
@@ -120,6 +135,7 @@ function inputHandler(n, RED) {
         Bucket: bucket,
         Key: key,
         ContentEncoding: contentencoding,
+        ACL: acl,
       });
       const result = await s3Client.deleteObject({
         Bucket: sourcebucket,
