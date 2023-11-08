@@ -1,0 +1,79 @@
+<!-- BEGIN PUT OBJECT ACL -->
+<script type="text/x-red" data-template-name="Put Object ACL">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="Name">&nbsp;</span>Name: </label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-conf"><code><i class="fa fa-cogs"></i></code> <span data-i18n="Configuration">&nbsp;</span>Client: </label>
+        <input type="text" id="node-input-conf">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bucket"><code><i class="fa fa-database"></i></code> <span data-i18n="Bucket">&nbsp;</span>Bucket: </label>
+        <input type="text" id="node-input-bucket" data-i18n="[placeholder]Bucket">
+    </div>
+    <div class="form-row">
+        <label for="node-input-key"><code><i class="fa fa-magic"></i></code> <span data-i18n="Key">&nbsp;</span>Key: </label>
+        <input type="text" id="node-input-key" data-i18n="[placeholder]Object Key">
+    </div
+    <div class="form-row">
+        <label for="node-input-acl"><i class="fa fa-lock"></i> <span data-i18n="acl">&nbsp;</span>ACL: </label>
+        <select id="node-input-acl">
+            <option value="" selected>Choose ACL permissions</option>
+            <option value="private">Private</option>
+            <option value="public-read">Public Read</option>
+            <option value="public-read-write">Public Read Write</option>
+            <option value="authenticated-read">Authenticated Read</option>
+            <option value="aws-exec-read">AWS Exec Read</option>
+            <option value="bucket-owner-read">Bucker Owner Read</option>
+            <option value="bucket-owner-full-control">Bucket Owner Full Control</option>
+        </select>
+    </div>
+    <div class="form-tips">
+        <span>Tips:</span>
+        <ul>
+            <li><span data-i18n="[html]tip1">Leave <code>Bucket</code> | <code>Key</code> | <code>Source Bucket</code> | <code>Source Object</code> | <code>Destination Content Encoding</code> field(s) blank if you are setting it via msg property. <code><b><u>Red</u></b></code> iconed properites are <code>required!</code> E.g.:
+                <ul>
+                    <li><code>msg.bucket = "test-bucket"</code></li>
+                    <li><code>msg.key = "object-key.json"</code></li>
+                    <li><code>msg.acl = "public-read"</code></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Put Object ACL">
+    <p>S3 Put Object ACL node. This node is used to move object
+    to another bucket with a new key.
+    <code>Bucket</code> - The new bucket |
+    <code>Key</code> - The new object key |
+    <code>ACL</code> - (Optional) Specifies which users have access to the object, and the type of access they have.
+
+    These values can be specified in the node properites or by setting input properties like the following
+    <code>msg.bucket</code> - The new bucket |
+    <code>msg.key</code> - The new object key |
+    <code>msg.acl</code> - (Optional) Specifies the object ACL permissions. |
+    </p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('Put Object ACL', {
+        category: 'storage-input',
+        color: "#FFFFFF",
+        defaults: {
+            name: { value: "" },
+            conf: { type: "client-s3", required: true },
+            bucket: { type: 'text', required: true },
+            key: { type: 'text', required: true },
+            acl: { type: 'text', required: true },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "s3Logo.png",
+        label: function () {
+            return this.name ? this.name : "Put Object ACL";
+        }
+    });
+</script>
+<!-- END PUT OBJECT ACL -->
