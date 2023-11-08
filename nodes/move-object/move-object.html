@@ -28,6 +28,19 @@
         <label for="node-input-contentencoding"><i class="fa fa-file-code-o"></i> <span data-i18n="Destination Content Encoding">&nbsp;</span>Destination Content Encoding: </label>
         <input type="text" id="node-input-contentencoding" data-i18n="[placeholder]gzip">
     </div>
+    <div class="form-row">
+        <label for="node-input-acl"><i class="fa fa-lock"></i> <span data-i18n="acl">&nbsp;</span>ACL: </label>
+        <select id="node-input-acl">
+            <option value="" selected>Choose ACL permissions</option>
+            <option value="private">Private</option>
+            <option value="public-read">Public Read</option>
+            <option value="public-read-write">Public Read Write</option>
+            <option value="authenticated-read">Authenticated Read</option>
+            <option value="aws-exec-read">AWS Exec Read</option>
+            <option value="bucket-owner-read">Bucker Owner Read</option>
+            <option value="bucket-owner-full-control">Bucket Owner Full Control</option>
+        </select>
+    </div>
     <div class="form-tips">
         <span>Tips:</span>
         <ul>
@@ -38,6 +51,7 @@
                     <li><code>msg.sourcebucket = "new-bucket"</code></li>
                     <li><code>msg.sourcekey = "new-object-key.json"</code></li>
                     <li><code>msg.contentencoding = "gzip"</code></li>
+                    <li><code>msg.acl = "public-read"</code></li>
                 </ul>
             </li>
         </ul>
@@ -52,6 +66,7 @@
     <code>Source Object</code> - The source object key |
     <code>Source Bucket</code> - The source object bucket |
     <code>Destination Content Encoding</code> - Content encoding of the destination object |
+    <code>ACL</code> - (Optional) Specifies which users have access to the object, and the type of access they have.
 
     These values can be specified in the node properites or by setting input properties like the following
     <code>msg.bucket</code> - The new bucket |
@@ -59,6 +74,7 @@
     <code>msg.sourcebucket</code> - The old bucket |
     <code>msg.sourcekey</code> - The old object key |
     <code>msg.contentencoding = "gzip"</code> - Content encoding of the destination object |
+    <code>msg.acl</code> - (Optional) Specifies the object ACL permissions. |
     </p>
 </script>
 
@@ -73,7 +89,8 @@
             key: { type: 'text', required: false },
             sourcebucket: { type: 'text', required: false },
             sourcekey: { type: 'text', required: false },
-            contentencoding: {type: 'text', required: false},
+            contentencoding: { type: 'text', required: false },
+            acl: { type: 'text', required: false },
         },
         inputs: 1,
         outputs: 1,
