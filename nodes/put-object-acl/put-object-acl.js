@@ -96,6 +96,9 @@ function inputHandler(n, RED) {
       });
 
       msgClone.payload = result;
+      // Append the object
+      // key to the message object
+      msgClone.key = key;
       // Return the complete message object
       send(msgClone);
       this.status({ fill: "green", shape: "dot", text: "Success" });
@@ -104,6 +107,9 @@ function inputHandler(n, RED) {
       this.status({ fill: "red", shape: "dot", text: "Failure" });
       // Replace the payload with null
       msgClone.payload = null;
+      // Append the object
+      // key to the message object
+      msgClone.key = key;
       msgClone.error = err;
       this.error(err, msgClone);
       send(msgClone);
