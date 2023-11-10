@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ​
 
 ## Unreleased
-
+Added Put Object ACL node
 ## 1.14.1 - 2023-11-08
 Added ACL support for Move Object node
 
