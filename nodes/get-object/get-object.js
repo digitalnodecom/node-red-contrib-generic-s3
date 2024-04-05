@@ -79,8 +79,9 @@ function inputHandler(n, RED) {
     // Version ID parameter
     let versionid = n.versionid != "" ? n.versionid : null;
     if (!versionid) {
-      payloadConfig.VersionId = msgClone.versionid ? msgClone.versionid : null;
+      versionid = msgClone.versionid ? msgClone.versionid : null;
     }
+    payloadConfig.VersionId = versionid;
 
     // Stringify body parameter
     let stringifybody = n.stringifybody ? n.stringifybody : false;
