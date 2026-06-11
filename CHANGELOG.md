@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 1.16.0 - 2026-06-11
+Added VersionId support to Delete Object node
+
 ## 1.15.1 - 2024-04-23
 
 ## 1.15.0 - 2023-11-10
