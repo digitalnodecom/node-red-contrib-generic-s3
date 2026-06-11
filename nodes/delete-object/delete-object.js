@@ -16,6 +16,8 @@ function instanceNode(RED) {
     this.bucket = n.bucket != "" ? n.bucket : null;
     // Key parameter
     this.key = n.key != "" ? n.key : null;
+    // VersionId parameter
+    this.versionid = n.versionid != "" ? n.versionid : null;
     // Input Handler
     this.on("input", inputHandler(this, RED));
   };
@@ -55,6 +57,12 @@ function inputHandler(n, RED) {
       }
     }
 
+    // VersionId parameter (optional)
+    let versionid = n.versionid != "" ? n.versionid : null;
+    if (!versionid) {
+      versionid = msgClone.versionid ? msgClone.versionid : null;
+    }
+
     // S3 client init
     let s3Client = null;
     try {
@@ -70,10 +78,9 @@ function inputHandler(n, RED) {
       });
 
       this.status({ fill: "blue", shape: "dot", text: "Deleting" });
-      const result = await s3Client.deleteObject({
-        Bucket: bucket,
-        Key: key,
-      });
+      const deleteParams = { Bucket: bucket, Key: key };
+      if (versionid) deleteParams.VersionId = versionid;
+      const result = await s3Client.deleteObject(deleteParams);
       // Replace the payload with
       // the returned data
       msgClone.payload = result;
